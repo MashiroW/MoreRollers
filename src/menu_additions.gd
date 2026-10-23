@@ -50,6 +50,12 @@ func StartSplitscreen():
 	for w in waterfalls: w.pause()
 	speaker_start.play()
 	cursor.SetCursor(false, false)
+	# Nothing may keep focus or hover while the menu is freed (Godot 4.1 can crash on that);
+	# the splitscreen lobby turns GUI input back on.
+	get_viewport().gui_disable_input = true
+	get_viewport().gui_release_focus()
+	get_viewport().notification(NOTIFICATION_VP_MOUSE_EXIT)
 	await get_tree().create_timer(4, false).timeout
+	get_viewport().gui_release_focus()
 	print("changing scene to: splitscreen lobby")
 	get_tree().change_scene_to_file(SplitMod.LOBBY_SCENE)

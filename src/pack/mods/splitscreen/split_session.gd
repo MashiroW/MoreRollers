@@ -22,6 +22,7 @@ var started := false
 var _prev_scale_mode := Window.CONTENT_SCALE_MODE_VIEWPORT
 var _isolation_caches : Array = []
 var _kbm_index := -1
+var _quitting := false
 
 
 func _ready() -> void:
@@ -36,6 +37,8 @@ func _ready() -> void:
 	if !SplitMod.active:
 		get_tree().change_scene_to_file.call_deferred(SplitMod.LOBBY_SCENE)
 		return
+	# Closing the window goes through shutdown() too (see _notification).
+	get_tree().auto_accept_quit = false
 	# Draw at the window's real resolution; each view renders at the game's own 960x540.
 	var win := get_window()
 	_prev_scale_mode = win.content_scale_mode
@@ -55,7 +58,7 @@ func _ready() -> void:
 		loading_label.text = "LOADING  %d / %d" % [c.index + 1, SplitMod.contexts.size()]
 		await get_tree().process_frame
 		await get_tree().process_frame
-		if !is_inside_tree():
+		if !is_inside_tree() or SplitMod.ending:
 			return
 		# A private copy of the scene file, so each match owns its sub-resources (meshes, materials, animations).
 		var packed : PackedScene = ResourceLoader.load(MP_MAIN, "PackedScene", ResourceLoader.CACHE_MODE_IGNORE)
@@ -82,11 +85,51 @@ func _ready() -> void:
 
 
 func _exit_tree() -> void:
-	if !SplitMod.active:
-		return
+	# The match copies are freed right after this; nothing of theirs runs in between.
+	if SplitMod.active:
+		SplitMod.session_closed()
+
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_WM_CLOSE_REQUEST and SplitMod.active:
+		_quitting = true
+		SplitMod.end_session("", true)
+
+
+## Ends the match without crashing Godot 4.1, which has two traps here:
+## - a control that still has focus or hover (a pause-menu button that was just pressed) queues a
+##   redraw while it leaves the tree, and that queued call then reads the freed control;
+## - the match's coroutines call get_tree().create_timer(), which crashes on a node outside the tree,
+##   so the copies must be freed inside the tree, never detached first.
+func shutdown(quitting: bool) -> void:
+	_quitting = _quitting or quitting
+	started = false
+	for v in views:
+		v.vp.gui_disable_input = true
+		_release_gui(v.vp)
+		for child in v.vp.get_children():
+			child.process_mode = Node.PROCESS_MODE_DISABLED
 	get_window().content_scale_mode = _prev_scale_mode
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
-	SplitMod.session_closed()
+	# Let the redraws queued above run while every control still exists.
+	await _frames(2)
+	# Anything that took focus back meanwhile is released again; those redraws are queued before the
+	# scene change below, so they also run before the copies are freed.
+	for v in views:
+		_release_gui(v.vp)
+		v.screen.texture = null
+	if _quitting:
+		get_tree().quit()
+	else:
+		get_tree().change_scene_to_file(SplitMod.LOBBY_SCENE)
+
+func _release_gui(vp: SubViewport) -> void:
+	vp.gui_release_focus()
+	vp.notification(NOTIFICATION_VP_MOUSE_EXIT)
+
+func _frames(count: int) -> void:
+	for i in count:
+		await get_tree().process_frame
 
 
 func _make_label(text: String, size: int) -> Label:

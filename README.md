@@ -44,7 +44,8 @@ Le dossier du jeu revient exactement à son état d'origine.
 
 1. Dans le menu principal, choisissez **LOCAL SPLITSCREEN**.
 2. Chaque joueur rejoint avec son propre périphérique. Le premier inscrit est le joueur 1, l'hôte de la partie.
-3. Réglez le nombre de manches et l'intro, puis choisissez **START**. Il faut au moins 2 joueurs.
+3. Si vous le souhaitez, personnalisez la partie avec **CUSTOMIZE MATCH SETTINGS**.
+4. Choisissez **START**. Il faut au moins 2 joueurs.
 
 ### Contrôles du lobby
 
@@ -53,18 +54,25 @@ Le dossier du jeu revient exactement à son état d'origine.
 | Rejoindre | Entrée, Espace ou clic gauche | A |
 | Quitter le lobby | Retour arrière | B |
 | Changer de ligne | Flèches haut / bas | Croix haut / bas ou stick gauche |
-| Changer une valeur | Flèches gauche / droite, ou clic sur la ligne | Croix gauche / droite ou stick gauche |
 | Valider | Entrée ou clic | A |
 | Lancer la partie | Ligne START | Ligne START ou bouton Start |
 | Retour au menu principal | Échap ou ligne BACK | Ligne BACK |
 
 Il n'y a qu'un seul joueur clavier et souris ; chaque autre joueur utilise une manette. Si une manette est débranchée dans le lobby, son joueur est retiré.
 
-### Réglages
+### Personnaliser la partie
 
-- **Manches** : 1, 2 ou 3.
-- **Passer l'intro** : démarre directement à la table, sans la cinématique d'arrivée.
-- Si vous avez personnalisé une partie dans le lobby multijoueur en ligne pendant la même session (objets, santé, cartouches), ces réglages sont repris.
+**CUSTOMIZE MATCH SETTINGS** ouvre l'écran de personnalisation d'origine du multijoueur, sans modification, avec tous ses réglages :
+- nombre de manches, et la manche dont on modifie les réglages ;
+- passer l'intro ;
+- santé de départ ;
+- pour chacun des 9 objets : maximum par joueur, maximum sur la table, présent ou non ;
+- pour chacune des 4 séquences de cartouches : nombre de cartouches à blanc, de vraies cartouches et d'objets distribués ;
+- revenir aux réglages par défaut.
+
+« Save changes and return » enregistre les réglages et ramène au lobby écran partagé ; « Cancel changes » y ramène sans rien changer. L'écran se pilote à la souris comme à la manette, comme dans le jeu.
+
+Le lobby affiche ensuite un résumé des réglages, avec les mêmes intitulés que le lobby en ligne : nombre de manches, intro passée, éléments personnalisés. Ces réglages sont partagés avec le lobby multijoueur en ligne et restent valables jusqu'à la fermeture du jeu, comme dans le jeu d'origine.
 
 ### En partie
 
@@ -109,7 +117,7 @@ Le mod recrée cette situation, mais dans un seul processus.
 ### Chargement du mod
 
 1. Au démarrage, Godot lit `override.cfg` dans le dossier de l'exécutable. Le mod y déclare l'autoload `SplitMod`, qui pointe vers `splitscreen_mod/loader.gd`.
-2. `loader.gd` s'exécute avant le chargement du menu principal. Il calcule le MD5 des 29 scripts du jeu que le mod remplace et le compare à ceux de la v2.2.0.6.
+2. `loader.gd` s'exécute avant le chargement du menu principal. Il calcule le MD5 des 30 scripts du jeu que le mod remplace et le compare à ceux de la v2.2.0.6.
 3. S'ils correspondent, il monte `splitscreen.pck` avec `ProjectSettings.load_resource_pack(..., replace_files = true)`. Les scripts du pack prennent alors la place des originaux, et les scènes du jeu les utilisent sans être modifiées.
 4. S'ils ne correspondent pas (mise à jour du jeu), il ne charge rien : le jeu tourne normalement, sans l'entrée LOCAL SPLITSCREEN.
 
@@ -166,11 +174,26 @@ Chaque `SubViewport` garde son propre focus d'interface : les manettes naviguent
 - Pendant la partie, la fenêtre passe en résolution native (`content_scale_mode = DISABLED`). Chaque vue est rendue en 960 × 540, puis affichée à l'échelle avec des bandes noires si besoin. Les réglages de rendu (anticrénelage, ombres, filtrage) sont copiés de la fenêtre du jeu.
 - Toutes les copies jouent les mêmes événements au même moment. Seul le `SubViewport` du joueur 1 a donc ses écouteurs audio 2D et 3D actifs, ce qui évite d'entendre chaque son en double.
 
-### Menu et lobby
+### Menu, lobby et personnalisation
 
 - `MenuManager.gd` ajoute l'entrée LOCAL SPLITSCREEN en dupliquant le bouton MULTIPLAYER. Elle a ainsi la même police, les mêmes sons, le même survol et la même navigation à la manette ; les boutons suivants sont décalés d'une ligne.
-- Le lobby est construit par code avec les polices, sons et musique du jeu. Il gère l'inscription par périphérique et les réglages.
-- En fin de partie, la session restaure tout ce qu'elle avait changé : identifiants et membres Steam, personnalisation du match, volumes et filtre audio, mode d'affichage, curseur. Elle revient ensuite au lobby.
+- Le lobby écran partagé est construit par code avec les polices, sons et musique du jeu. Il gère l'inscription par périphérique.
+- **CUSTOMIZE MATCH SETTINGS** ouvre la vraie scène du lobby multijoueur (`mp_lobby`) avec `SplitMod.customizing` activé. `MP_LobbyUI.gd` passe alors directement à l'écran de personnalisation, sans lobby Steam. Quitter cet écran (`ExitMatchCustomization`) ramène au lobby écran partagé au lieu de l'accueil du lobby en ligne. Le reste est le code d'origine : l'écran enregistre ses réglages dans `GlobalVariables.stashed_match_customization_dictionary`, comme pour l'hôte d'une partie en ligne.
+- Au lancement d'une partie, ces réglages deviennent le dictionnaire de match actif. Le nombre de manches et l'intro sont appliqués comme le fait le lobby en ligne.
+- En fin de partie, la session restaure tout ce qu'elle avait changé : identifiants et membres Steam, personnalisation active, volumes et filtre audio, mode d'affichage, curseur. Elle revient ensuite au lobby.
+
+### Quitter une partie sans plantage
+
+Godot 4.1 présente deux pièges quand on libère une scène aussi grosse qu'une copie du match :
+- un contrôle qui a encore le focus ou le survol (par exemple le bouton du menu pause qu'on vient de presser) programme un rafraîchissement différé en quittant l'arbre. Ce rafraîchissement s'exécute ensuite sur le contrôle déjà libéré, ce qui provoque un plantage intermittent ;
+- les coroutines du jeu appellent `get_tree().create_timer()` : si le nœud est sorti de l'arbre, ce `get_tree()` est nul, et la version publiée du moteur plante au lieu de signaler l'erreur.
+
+La session se termine donc par étapes :
+1. Les entrées sont coupées, le focus et le survol sont retirés de chaque vue, et la fenêtre et le curseur sont restaurés.
+2. Le moteur dispose de deux images pour exécuter le travail programmé, pendant que tout existe encore.
+3. Le focus est retiré une seconde fois, puis la scène est changée : les copies sont libérées à l'intérieur de l'arbre, jamais détachées avant.
+
+La fermeture de la fenêtre pendant une partie passe par le même chemin (`auto_accept_quit` est désactivé pendant la session). Le passage du menu principal au lobby et le retour depuis l'écran de personnalisation retirent eux aussi focus et survol avant de changer de scène.
 
 ---
 
@@ -182,16 +205,21 @@ Si une mise à jour modifie l'un des scripts remplacés, le mod se désactive to
 
 Vérifié dans une copie isolée du jeu, à 2 joueurs (souris pour le joueur 1, manette simulée pour le joueur 2) :
 - l'entrée du menu principal, sa navigation à la manette et le passage au lobby ;
-- le lobby : inscription, réglages et retour au menu ;
+- le lobby : inscription et retour au menu ;
+- l'écran de personnalisation d'origine, piloté à la souris et à la manette, avec des réglages bien appliqués à la partie suivante ;
 - le démarrage de la partie et la synchronisation des vues ;
 - la distribution d'objets, la prise du fusil, les tirs, les dégâts et le passage des tours ;
+- la fin de partie : écran des résultats puis retour au lobby ;
+- « Disconnect » depuis le menu pause, avec les vrais boutons, pour le joueur 1 (souris) comme pour le joueur 2 (manette), y compris pendant l'écran des résultats ;
+- la fermeture de la fenêtre en pleine partie ;
+- le lobby multijoueur en ligne, qui se comporte comme dans le jeu d'origine (accueil, personnalisation, annulation) ;
 - l'installation et la désinstallation, avec et sans `override.cfg` existant.
 
+Une partie complète à 2 joueurs (souris + vraie manette) a aussi été jouée sur la version installée.
+
 Pas encore vérifié :
-- une partie complète jusqu'à l'écran des résultats ;
 - 3 et 4 joueurs ;
-- de vraies manettes ;
-- le multijoueur en ligne avec le mod installé.
+- une partie en ligne complète avec le mod installé.
 
 ---
 
@@ -222,8 +250,9 @@ Aucun fichier du jeu n'est stocké dans le dépôt : `build\` est ignoré par Gi
 | `mod\` | Le mod compilé, c'est-à-dire ce qui est installé dans le jeu |
 | `src\loader.gd` | Autoload `SplitMod` : vérification de version, chargement du pack, contexte par joueur, bus de paquets |
 | `src\menu_additions.gd` | Entrée LOCAL SPLITSCREEN, ajoutée à la fin de `MenuManager.gd` |
-| `src\pack\mods\splitscreen\split_lobby.*` | Lobby : inscription des joueurs et réglages |
-| `src\pack\mods\splitscreen\split_session.*` | Partie : vues, chargement des copies du match, routage des entrées |
+| `src\lobby_ui_additions.gd` | Mode « personnalisation seule » du lobby multijoueur, ajouté à la fin de `MP_LobbyUI.gd` |
+| `src\pack\mods\splitscreen\split_lobby.*` | Lobby : inscription des joueurs, accès à la personnalisation, résumé des réglages |
+| `src\pack\mods\splitscreen\split_session.*` | Partie : vues, chargement des copies du match, routage des entrées, fin de partie par étapes |
 | `tools\build.js` | Modifications des scripts du jeu et compilation du mod |
 | `tools\pck.js`, `tools\mkpck.js` | Lecture et écriture des packs Godot 4.1 (format PCK v2) |
 | `tools\mp_main_scripts.txt` | Liste des scripts utilisés par la scène multijoueur |
@@ -252,6 +281,10 @@ Lancements utiles depuis Git Bash (journal dans `%APPDATA%\BuckshotSplitTest\log
 |---|---|
 | `SPLIT_TEST_MODE=menu "Buckshot Roulette.exe" --headless` | Vérifie l'entrée du menu et le lobby, sans fenêtre |
 | `SPLIT_TEST_MODE=session "Buckshot Roulette.exe" --windowed` | Joue une partie à 2 joueurs avec des entrées simulées (souris et manette) |
+| `SPLIT_TEST_MODE=disconnect_real SPLIT_TEST_DISCONNECT=1` (ou `2`) | Le joueur 1 (Échap + clics) ou 2 (Start, croix, A) quitte la partie par les vrais boutons du menu pause |
+| `SPLIT_TEST_MODE=conclusion`, avec ou sans `SPLIT_TEST_DISCONNECT=1` / `2` | L'hôte termine la partie (écran des résultats), avec éventuellement une déconnexion pendant les résultats |
+| `SPLIT_TEST_MODE=custom_visual` | Lobby et écran de personnalisation (manette), puis une partie avec les réglages enregistrés |
+| `SPLIT_TEST_MODE=online_lobby` avec `--headless` | Vérifie que le lobby multijoueur en ligne n'a pas changé |
 | `CHECK_LIST=<liste.txt> "Buckshot Roulette.exe" --headless --script <chemin absolu>/tools/godot/compile_check.gd` | Compile dans le moteur du jeu les scripts listés (un chemin `res://` par ligne) |
 
 ---

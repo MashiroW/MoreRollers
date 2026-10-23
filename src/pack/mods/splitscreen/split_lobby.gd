@@ -1,6 +1,6 @@
 extends Control
-## Splitscreen lobby: local players join with their device, then the host settings are picked
-## and the match starts. Works with keyboard & mouse and any number of controllers (2-4 players).
+## Splitscreen lobby: local players join with their device, the match is customized on the game's own
+## customization screen, and the match starts. Works with keyboard & mouse and any number of controllers (2-4 players).
 
 const FONT_MAIN := "res://fonts/fake receipt.otf"
 const TEX_VIGNETTE := "res://misc/menu vignette1.png"
@@ -11,13 +11,14 @@ const SND_START := "res://audio/button_start main.ogg"
 const MUSIC := "res://multiplayer/audio/music/mp_music desolate loop3.ogg"
 const STICK_THRESHOLD := 0.6
 
-enum Row { ROUNDS, SKIP_INTRO, START, BACK }
+enum Row { CUSTOMIZE, START, BACK }
 
 var font : Font
 var slots : Array = []
 var rows : Array = []
 var selected := Row.START
 var message_label : Label
+var summary_label : Label
 var fader : ColorRect
 var leaving := false
 var stick_latch := {}
@@ -31,7 +32,8 @@ var speaker_music : AudioStreamPlayer
 func _ready() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	font = load(FONT_MAIN)
-	SplitMod.load_settings_from_game()
+	# Scenes leaving for this lobby turn GUI input off while they are freed.
+	get_viewport().gui_disable_input = false
 	AudioServer.set_bus_volume_db(3, linear_to_db(GlobalVariables.original_volume_linear_interaction))
 	AudioServer.set_bus_volume_db(1, linear_to_db(GlobalVariables.original_volume_linear_music))
 	_restore_cursor()
@@ -111,12 +113,16 @@ func _build() -> void:
 		slots.append({"panel": panel, "title": title, "device": device, "status": status})
 
 	var y := 300.0
-	for r in [Row.ROUNDS, Row.SKIP_INTRO, Row.START, Row.BACK]:
+	for r in [Row.CUSTOMIZE, Row.START, Row.BACK]:
 		var l := _label("", 22, Vector2(0, y), 960)
 		rows.append(l)
 		y += 34.0
 
-	message_label = _label("", 16, Vector2(0, 444), 960)
+	summary_label = _label("", 13, Vector2(120, 408), 720)
+	summary_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	summary_label.size.y = 40
+	summary_label.modulate.a = 0.6
+	message_label = _label("", 16, Vector2(0, 458), 960)
 	message_label.modulate = Color(1, 0.45, 0.45, 0)
 	var hint := _label("JOIN: ENTER / LEFT CLICK / (A)        LEAVE: BACKSPACE / (B)        SELECT: ARROWS / D-PAD", 12, Vector2(0, 498), 960)
 	hint.modulate.a = 0.5
@@ -161,8 +167,7 @@ func _refresh() -> void:
 			slot.status.text = "PRESS ENTER / CLICK\nOR (A) TO JOIN" if i == SplitMod.players.size() else ""
 			slot.status.modulate.a = 0.5
 	var texts := {
-		Row.ROUNDS: "ROUNDS:  %d" % SplitMod.setting_rounds,
-		Row.SKIP_INTRO: "SKIP INTRO:  %s" % ("YES" if SplitMod.setting_skip_intro else "NO"),
+		Row.CUSTOMIZE: tr("MP_UI CUSTOMIZE MATCH"),
 		Row.START: "START",
 		Row.BACK: "BACK",
 	}
@@ -172,6 +177,7 @@ func _refresh() -> void:
 		l.modulate.a = 1.0 if r == selected else 0.55
 	if SplitMod.players.size() < SplitMod.MIN_PLAYERS:
 		rows[Row.START].modulate.a *= 0.5
+	summary_label.text = "     ".join(SplitMod.match_summary())
 
 func _show_message(text: String) -> void:
 	message_label.text = text
@@ -215,8 +221,6 @@ func _on_key(event: InputEventKey) -> void:
 			if !event.echo: _back_to_menu()
 		KEY_UP: _move(-1)
 		KEY_DOWN: _move(1)
-		KEY_LEFT: _change(-1)
-		KEY_RIGHT: _change(1)
 
 func _on_click(pos: Vector2) -> void:
 	if !SplitMod.is_joined(SplitMod.DEVICE_KBM):
@@ -226,10 +230,7 @@ func _on_click(pos: Vector2) -> void:
 	if r == -1:
 		return
 	_select(r)
-	if r == Row.ROUNDS or r == Row.SKIP_INTRO:
-		_change(-1 if pos.x < 480 else 1)
-	else:
-		_activate()
+	_activate()
 
 func _on_pad_button(event: InputEventJoypadButton) -> void:
 	var device := event.device
@@ -244,11 +245,9 @@ func _on_pad_button(event: InputEventJoypadButton) -> void:
 			else: _join(device)
 		JOY_BUTTON_DPAD_UP: _move(-1)
 		JOY_BUTTON_DPAD_DOWN: _move(1)
-		JOY_BUTTON_DPAD_LEFT: _change(-1)
-		JOY_BUTTON_DPAD_RIGHT: _change(1)
 
 func _on_pad_motion(event: InputEventJoypadMotion) -> void:
-	if event.axis != JOY_AXIS_LEFT_X and event.axis != JOY_AXIS_LEFT_Y:
+	if event.axis != JOY_AXIS_LEFT_Y:
 		return
 	var key := "%d:%d" % [event.device, event.axis]
 	if absf(event.axis_value) < STICK_THRESHOLD * 0.5:
@@ -257,9 +256,7 @@ func _on_pad_motion(event: InputEventJoypadMotion) -> void:
 	if absf(event.axis_value) < STICK_THRESHOLD or stick_latch.get(key, false):
 		return
 	stick_latch[key] = true
-	var dir := 1 if event.axis_value > 0 else -1
-	if event.axis == JOY_AXIS_LEFT_Y: _move(dir)
-	else: _change(dir)
+	_move(1 if event.axis_value > 0 else -1)
 
 func _row_at(pos: Vector2) -> int:
 	for r in rows.size():
@@ -280,21 +277,9 @@ func _select(r: int) -> void:
 func _move(dir: int) -> void:
 	_select(wrapi(selected + dir, 0, rows.size()))
 
-func _change(dir: int) -> void:
-	match selected:
-		Row.ROUNDS:
-			SplitMod.setting_rounds = wrapi(SplitMod.setting_rounds - 1 + dir, 0, 3) + 1
-		Row.SKIP_INTRO:
-			SplitMod.setting_skip_intro = !SplitMod.setting_skip_intro
-		_:
-			return
-	speaker_press.play()
-	_refresh()
-
 func _activate() -> void:
 	match selected:
-		Row.ROUNDS: _change(1)
-		Row.SKIP_INTRO: _change(1)
+		Row.CUSTOMIZE: _open_customization()
 		Row.START: _try_start()
 		Row.BACK: _back_to_menu()
 
@@ -325,6 +310,15 @@ func _try_start() -> void:
 	tween.tween_property(fader, "color:a", 1.0, 0.6)
 	await get_tree().create_timer(1.6, false).timeout
 	SplitMod.start_session()
+
+func _open_customization() -> void:
+	leaving = true
+	speaker_music.stop()
+	speaker_press.play()
+	var tween := create_tween()
+	tween.tween_property(fader, "color:a", 1.0, 0.5)
+	await get_tree().create_timer(0.7, false).timeout
+	SplitMod.open_customization()
 
 func _back_to_menu() -> void:
 	leaving = true

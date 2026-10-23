@@ -39,7 +39,7 @@ const GENERIC = [
   ['GlobalVariables.cursor_state_after_toggle', 'SplitMod.gv(self).cursor_state_after_toggle'],
 ];
 
-const GUARD = '\tif SplitMod.active: return\n';
+const GUARD = '\tif SplitMod.blocks_steam_lobby(): return\n';
 
 // File-specific edits, applied to the original text before the generic ones.
 const SPECIFIC = {
@@ -91,6 +91,14 @@ func split_read_p2p_packet() -> void:
   'res://multiplayer/scripts/global scripts/MP_InteractionIntermediary.gd': [
     ['\tget_tree().change_scene_to_file("res://multiplayer/scenes/mp_lobby.tscn")', '\tSplitMod.change_scene(self, "res://multiplayer/scenes/mp_lobby.tscn")', 1],
   ],
+  // Opened from the splitscreen lobby, the multiplayer lobby goes straight to its customization screen.
+  'res://multiplayer/scripts/global scripts/MP_LobbyUI.gd': [
+    ['\tcursor.SetCursor(false, false)\n\tUpdatePlayerList()\n',
+     '\tcursor.SetCursor(false, false)\n\tUpdatePlayerList()\n\tif SplitMod.customizing:\n\t\tSetWidth()\n\t\tmatch_customization.ClearMatchCustomizationUI()\n\t\tSplitCustomizeIntro()\n\t\treturn\n', 1],
+    ['func ExitMatchCustomization():\n',
+     'func ExitMatchCustomization():\n\tif SplitMod.customizing:\n\t\tSplitReturnFromCustomization()\n\t\treturn\n', 1],
+    [null, fs.readFileSync(path.join(root, 'src', 'lobby_ui_additions.gd'), 'utf8'), 0],
+  ],
   'res://scripts/MenuManager.gd': [
     ['\tbuttons[22].connect("is_pressed", StartMultiplayer)\n', '\tbuttons[22].connect("is_pressed", StartMultiplayer)\n\t_splitscreen_add_button()\n', 1],
     [null, fs.readFileSync(path.join(root, 'src', 'menu_additions.gd'), 'utf8'), 0],
@@ -138,11 +146,11 @@ for (const res of [...files].sort()) {
   report.push(res);
 }
 
-// Leftovers that would mean a patch was missed.
-for (const res of report) {
+// Leftovers in the match scripts would mean a patch was missed.
+for (const res of report.filter((r) => matchScripts.includes(r))) {
   const text = fs.readFileSync(path.join(stage, res.replace('res://', '')), 'utf8');
   for (const bad of ['GlobalSteam.STEAM_ID', '/root/mp_main', 'Input.set_mouse_mode', 'AudioServer.set_bus_volume_db', 'Steam.getFriendPersonaName']) {
-    if (text.includes(bad) && !res.endsWith('MenuManager.gd')) {
+    if (text.includes(bad)) {
       throw new Error(`${res} still contains ${bad}`);
     }
   }

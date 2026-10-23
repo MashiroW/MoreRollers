@@ -16,6 +16,7 @@ const PACK_FILE := "splitscreen.pck"
 const LOBBY_SCENE := "res://mods/splitscreen/split_lobby.tscn"
 const SESSION_SCENE := "res://mods/splitscreen/split_session.tscn"
 const MENU_SCENE := "res://scenes/menu.tscn"
+const MP_LOBBY_SCENE := "res://multiplayer/scenes/mp_lobby.tscn"
 const MATCH_CUSTOMIZATION_SCRIPT := "res://multiplayer/scripts/global scripts/MP_MatchCustomization.gd"
 const MAX_PLAYERS := 4
 const MIN_PLAYERS := 2
@@ -44,12 +45,11 @@ var active := false
 var ending := false
 ## Joined players, in seat order: {"device": int, "id": int, "name": String}
 var players : Array = []
-var setting_rounds := 3
-var setting_skip_intro := false
+## True while the multiplayer lobby scene is open on its match customization screen for splitscreen.
+var customizing := false
 var lobby_message := ""
 var contexts : Array = []
 var _saved := {}
-var _settings_loaded := false
 
 
 func _init() -> void:
@@ -95,14 +95,35 @@ func device_label(device: int) -> String:
 		return "KEYBOARD & MOUSE"
 	return "CONTROLLER %d" % (device + 1)
 
-func load_settings_from_game() -> void:
-	if _settings_loaded:
-		return
-	_settings_loaded = true
+## Opens the multiplayer lobby scene straight on its match customization screen (see the MP_LobbyUI patch).
+## Saving or cancelling there comes back to the splitscreen lobby.
+func open_customization() -> void:
+	customizing = true
+	GlobalVariables.message_to_forward = ""
+	get_tree().change_scene_to_file(MP_LOBBY_SCENE)
+
+## Steam lobby callbacks are ignored during a splitscreen match and on the customization screen.
+func blocks_steam_lobby() -> bool:
+	return active or customizing
+
+## The settings a splitscreen match uses: the ones saved on the customization screen (shared with the
+## online lobby, like in the game), else the game's defaults.
+func match_settings() -> Dictionary:
 	var stashed : Dictionary = GlobalVariables.stashed_match_customization_dictionary
-	if !stashed.is_empty():
-		setting_rounds = clampi(int(stashed.get("number_of_rounds", 3)), 1, 3)
-		setting_skip_intro = bool(stashed.get("skipping_intro", false))
+	return (stashed if !stashed.is_empty() else _default_match_customization()).duplicate(true)
+
+## Lines describing match_settings(), worded like the online lobby's customization summary.
+func match_summary() -> Array:
+	var node : Node = (load(MATCH_CUSTOMIZATION_SCRIPT) as Script).new()
+	var default : Dictionary = node.default_customization_dictionary
+	var m := match_settings()
+	var lines := [tr("MP_UI NUMBER OF ROUNDS") + " " + str(m.number_of_rounds)]
+	if m.skipping_intro: lines.append(tr("MP_UI SKIP INTRO"))
+	if node.StartingHealthChanged(default, m): lines.append(tr("MP_UI STARTING HEALTH").replace(":", ""))
+	if node.ItemDistributionChanged(default, m): lines.append(tr("MP_UI ITEM DISTRIBUTION").replace(":", ""))
+	if node.ShellSequenceChanged(default, m): lines.append(tr("MP_UI SHELL SEQUENCE").replace(":", ""))
+	node.free()
+	return lines
 
 
 # ---------------------------------------------------------------- session lifecycle
@@ -130,15 +151,22 @@ func start_session() -> void:
 	get_tree().change_scene_to_file(SESSION_SCENE)
 
 ## Called by the patched scripts (or the session) to leave the match and go back to the splitscreen lobby.
-func end_session(message: String = "") -> void:
+## The session tears the match copies down in stages first (see split_session.gd shutdown()).
+func end_session(message: String = "", quitting := false) -> void:
 	if !active or ending:
 		return
 	ending = true
 	lobby_message = message
 	print("[splitscreen] ending match: ", message)
-	get_tree().change_scene_to_file(LOBBY_SCENE)
+	var session := get_tree().current_scene
+	if session != null and session.has_method("shutdown"):
+		session.shutdown(quitting)
+	else:
+		session_closed()
+		if quitting: get_tree().quit()
+		else: get_tree().change_scene_to_file(LOBBY_SCENE)
 
-## Called by the session scene when it leaves the tree, after every match instance is gone.
+## Called once every match copy is gone: puts back everything the match changed.
 func session_closed() -> void:
 	if !active:
 		return
@@ -146,6 +174,7 @@ func session_closed() -> void:
 	contexts.clear()
 	active = false
 	ending = false
+	get_tree().auto_accept_quit = true
 
 func _save_globals() -> void:
 	var buses := []
@@ -173,15 +202,11 @@ func _apply_globals() -> void:
 		members.append({"steam_id": c.user_id, "steam_name": c.name})
 	GlobalSteam.LOBBY_MEMBERS = members
 	GlobalSteam.USER_ID_LIST_TO_IGNORE.clear()
-	var base : Dictionary = GlobalVariables.stashed_match_customization_dictionary
-	if base.is_empty():
-		base = _default_match_customization()
-	var m : Dictionary = base.duplicate(true)
-	m.number_of_rounds = setting_rounds
-	m.skipping_intro = setting_skip_intro
+	# What the online host's lobby sets when a customized match starts.
+	var m := match_settings()
 	GlobalVariables.active_match_customization_dictionary = m
-	GlobalVariables.skipping_intro = setting_skip_intro
-	GlobalVariables.debug_round_index_to_end_game_at = setting_rounds - 1
+	GlobalVariables.skipping_intro = m.skipping_intro
+	GlobalVariables.debug_round_index_to_end_game_at = m.number_of_rounds - 1
 	GlobalVariables.message_to_forward = ""
 	GlobalVariables.disband_lobby_after_exiting_main_scene = false
 
@@ -260,18 +285,25 @@ func get_player_avatar(size: int, id) -> void:
 	Steam.getPlayerAvatar(size, id)
 
 func change_scene(node: Node, path: String) -> void:
-	if ctx_of(node) != null:
+	if active:
 		var message : String = GlobalVariables.message_to_forward
 		GlobalVariables.message_to_forward = ""
 		end_session(message)
 		return
 	node.get_tree().change_scene_to_file(path)
 
+## During a session every patched script runs inside a player's view; a call from a node outside of one
+## (out of the tree) must not reach the real cursor or audio buses.
+func _detached(c: Ctx) -> bool:
+	return active and c == null
+
 
 # ---------------------------------------------------------------- mouse
 
 func set_mouse_mode(node: Node, mode) -> void:
 	var c := ctx_of(node)
+	if _detached(c):
+		return
 	if c == null:
 		Input.set_mouse_mode(mode)
 		return
@@ -284,7 +316,7 @@ func set_mouse_mode(node: Node, mode) -> void:
 
 func set_custom_mouse_cursor(node: Node, image, shape = Input.CURSOR_ARROW, hotspot = Vector2.ZERO) -> void:
 	var c := ctx_of(node)
-	if c != null and !c.owns_mouse:
+	if _detached(c) or (c != null and !c.owns_mouse):
 		return
 	Input.set_custom_mouse_cursor(image, shape, hotspot)
 
@@ -293,12 +325,14 @@ func set_custom_mouse_cursor(node: Node, image, shape = Input.CURSOR_ARROW, hots
 
 func set_bus_volume_db(node: Node, bus: int, db: float) -> void:
 	var c := ctx_of(node)
-	if c != null and !c.primary:
+	if _detached(c) or (c != null and !c.primary):
 		return
 	AudioServer.set_bus_volume_db(bus, db)
 
 func get_bus_effect(node: Node, bus: int, effect: int) -> AudioEffect:
 	var c := ctx_of(node)
+	if _detached(c):
+		return AudioEffectLowPassFilter.new()
 	if c != null and !c.primary:
 		return c.lowpass_dummy
 	return AudioServer.get_bus_effect(bus, effect)
