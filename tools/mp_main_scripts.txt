@@ -1,0 +1,83 @@
+res://multiplayer/scripts/MP_ControllerManager.gd
+res://multiplayer/scripts/MP_CursorManager.gd
+res://multiplayer/scripts/MP_LobbyManager.gd
+res://multiplayer/scripts/MP_PacketManager.gd
+res://multiplayer/scripts/debugging/MP_EditorDebug.gd
+res://multiplayer/scripts/debugging/MP_FreeLookCamera.gd
+res://multiplayer/scripts/global scripts/MP_ActiveUserProperties.gd
+res://multiplayer/scripts/global scripts/MP_BlinkerBranch.gd
+res://multiplayer/scripts/global scripts/MP_ButtonClassMain.gd
+res://multiplayer/scripts/global scripts/MP_CenterPiece.gd
+res://multiplayer/scripts/global scripts/MP_DescriptionManager.gd
+res://multiplayer/scripts/global scripts/MP_EnvironmentalEvent.gd
+res://multiplayer/scripts/global scripts/MP_FilterController.gd
+res://multiplayer/scripts/global scripts/MP_GameStateManager.gd
+res://multiplayer/scripts/global scripts/MP_IngameLobbyUI.gd
+res://multiplayer/scripts/global scripts/MP_InteractionBranch.gd
+res://multiplayer/scripts/global scripts/MP_InteractionIntermediary.gd
+res://multiplayer/scripts/global scripts/MP_IntroManager.gd
+res://multiplayer/scripts/global scripts/MP_ItemRemover_Handler.gd
+res://multiplayer/scripts/global scripts/MP_ItemRemover_Main.gd
+res://multiplayer/scripts/global scripts/MP_ItemResource.gd
+res://multiplayer/scripts/global scripts/MP_LightController.gd
+res://multiplayer/scripts/global scripts/MP_LightFlicker.gd
+res://multiplayer/scripts/global scripts/MP_MemberChecker.gd
+res://multiplayer/scripts/global scripts/MP_MusicManager.gd
+res://multiplayer/scripts/global scripts/MP_OutroManager.gd
+res://multiplayer/scripts/global scripts/MP_PacketVerification.gd
+res://multiplayer/scripts/global scripts/MP_PickupIndicator.gd
+res://multiplayer/scripts/global scripts/MP_PropAudioDevice.gd
+res://multiplayer/scripts/global scripts/MP_PropVoltMeter.gd
+res://multiplayer/scripts/global scripts/MP_RandBlinkerBranch.gd
+res://multiplayer/scripts/global scripts/MP_RoundManager.gd
+res://multiplayer/scripts/global scripts/MP_SeparateLerp.gd
+res://multiplayer/scripts/global scripts/MP_SequenceBatchResource.gd
+res://multiplayer/scripts/global scripts/MP_ShellBranch.gd
+res://multiplayer/scripts/global scripts/MP_ShellLoader.gd
+res://multiplayer/scripts/global scripts/MP_SpeakerController.gd
+res://multiplayer/scripts/global scripts/MP_TextFire.gd
+res://multiplayer/scripts/global scripts/MP_TrackInstance.gd
+res://multiplayer/scripts/global scripts/MP_TurnOrder.gd
+res://multiplayer/scripts/global scripts/MP_UserInfoSegment.gd
+res://multiplayer/scripts/global scripts/MP_UserInstanceHandler.gd
+res://multiplayer/scripts/global scripts/MP_WinManager.gd
+res://multiplayer/scripts/user scripts/MP_BriefcaseMachine.gd
+res://multiplayer/scripts/user scripts/MP_BurnerPhone.gd
+res://multiplayer/scripts/user scripts/MP_CameraManager.gd
+res://multiplayer/scripts/user scripts/MP_CameraShaker.gd
+res://multiplayer/scripts/user scripts/MP_CameraSocket.gd
+res://multiplayer/scripts/user scripts/MP_DeathManager.gd
+res://multiplayer/scripts/user scripts/MP_DialogueManager.gd
+res://multiplayer/scripts/user scripts/MP_HandManager.gd
+res://multiplayer/scripts/user scripts/MP_HealthCounter.gd
+res://multiplayer/scripts/user scripts/MP_HoverPan.gd
+res://multiplayer/scripts/user scripts/MP_InteractionManager.gd
+res://multiplayer/scripts/user scripts/MP_ItemInteraction.gd
+res://multiplayer/scripts/user scripts/MP_ItemManager.gd
+res://multiplayer/scripts/user scripts/MP_ItemStealing.gd
+res://multiplayer/scripts/user scripts/MP_Jammer.gd
+res://multiplayer/scripts/user scripts/MP_JammerButton.gd
+res://multiplayer/scripts/user scripts/MP_MainHandInstance.gd
+res://multiplayer/scripts/user scripts/MP_MainHandInstanceBranch.gd
+res://multiplayer/scripts/user scripts/MP_MouseRaycast.gd
+res://multiplayer/scripts/user scripts/MP_Oscillate.gd
+res://multiplayer/scripts/user scripts/MP_OscillateManager.gd
+res://multiplayer/scripts/user scripts/MP_ShellEjection.gd
+res://multiplayer/scripts/user scripts/MP_ShotgunInteraction.gd
+res://multiplayer/scripts/user scripts/MP_SmokeParticles.gd
+res://multiplayer/scripts/user scripts/MP_TextShaker.gd
+res://multiplayer/scripts/user scripts/MP_UserCameraLook.gd
+res://multiplayer/scripts/user scripts/MP_UserCustomization.gd
+res://multiplayer/scripts/user scripts/MP_UserDebug.gd
+res://multiplayer/scripts/user scripts/MP_UserInspection.gd
+res://multiplayer/scripts/user scripts/MP_UserInstanceProperties.gd
+res://multiplayer/scripts/user scripts/MP_UserLook.gd
+res://multiplayer/scripts/user scripts/MP_UserPermissions.gd
+res://multiplayer/scripts/user scripts/MP_UserStateManager.gd
+res://multiplayer/scripts/user scripts/MP_UserTimeout.gd
+res://multiplayer/scripts/user scripts/MP_UserTimeout_BarLerp.gd
+res://multiplayer/scripts/user scripts/MP_UserTimeout_Branch.gd
+res://multiplayer/scripts/user scripts/MP_Viewblocker.gd
+res://scripts/CursorManager.gd
+res://scripts/ObjectShaker.gd
+res://scripts/SpeakerController3D.gd
