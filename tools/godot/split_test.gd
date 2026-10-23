@@ -8,7 +8,7 @@ extends Node
 ## SPLIT_TEST_MODE=custom_visual   lobby + customization screen driven with the controller, then a match
 ## SPLIT_TEST_MODE=online_lobby    the normal multiplayer lobby, which must be unchanged
 ## SPLIT_TEST_MODE=disconnect / experiment / quit: narrower checks used while tracking the teardown crash
-## SPLIT_TEST_SHOTS=<folder> saves screenshots there.
+## SPLIT_TEST_SHOTS=<folder> saves screenshots there (SPLIT_TEST_VIEWS=1 also saves each player's view).
 
 var mode := ""
 var shots_dir := ""
@@ -377,8 +377,14 @@ func _screenshot() -> void:
 	var img := get_viewport().get_texture().get_image()
 	if img == null: return
 	var path := shots_dir.path_join("shot_%04d.png" % shot_index)
-	shot_index += 1
 	img.save_png(path)
+	# SPLIT_TEST_VIEWS=1 also saves each player's view at its own resolution.
+	var session = get_tree().current_scene
+	if OS.get_environment("SPLIT_TEST_VIEWS") == "1" and SplitMod.active and session != null and session.get("views") != null:
+		for v in session.views:
+			var view_img : Image = v.vp.get_texture().get_image()
+			if view_img != null: view_img.save_png(shots_dir.path_join("shot_%04d_p%d.png" % [shot_index, v.ctx.index + 1]))
+	shot_index += 1
 
 func _intermediary(v):
 	var root = v.vp.get_child(0)

@@ -26,7 +26,9 @@ try {
     $cfg = Join-Path $GameDir "override.cfg"
     $loaderPath = (Join-Path $target "loader.gd") -replace "\\", "/"
     $entry = 'SplitMod="*' + $loaderPath + '"'
-    if ((Test-Path -LiteralPath $cfg) -and -not (Test-Path -LiteralPath "$cfg.before-splitscreen")) {
+    # Back up an override.cfg that holds settings of its own (not one that only has this mod's line).
+    $foreign = @(Read-CfgLines $cfg | Where-Object { $_.Trim() -ne "" -and $_ -notmatch '^\s*\[.*\]\s*$' -and $_ -notmatch '^\s*;' -and $_ -notmatch '^\s*SplitMod\s*=' })
+    if ($foreign.Count -gt 0 -and -not (Test-Path -LiteralPath "$cfg.before-splitscreen")) {
         Copy-Item -LiteralPath $cfg -Destination "$cfg.before-splitscreen"
     }
     $lines = New-Object System.Collections.Generic.List[string]

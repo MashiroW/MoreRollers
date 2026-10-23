@@ -1,294 +1,305 @@
-# Buckshot Roulette — Local Splitscreen
+![MoreRollers](./res/banner.png?raw=true "MoreRollers")
 
-Mod pour **Buckshot Roulette** (Steam, Windows) qui ajoute un mode **multijoueur local en écran partagé** : de 2 à 4 joueurs sur un seul PC, chacun avec sa propre vue.
+# MoreRollers - Local Splitscreen for Buckshot Roulette
+*A mod that adds **local splitscreen multiplayer** to **Buckshot Roulette**: 2 to 4 players on a single PC, each with their own view, playing the game's real multiplayer match.*
 
-Le mod ne réécrit pas le jeu : il fait tourner le **mode multijoueur officiel**, une copie par joueur, reliées entre elles comme si elles étaient en ligne. On retrouve donc exactement la même table, les mêmes objets, les mêmes règles et le même écran de résultats qu'en partie en ligne.
+---
+
+## 📌 What it does
+
+MoreRollers adds a **LOCAL SPLITSCREEN** entry to the main menu, right under MULTIPLAYER.
+
+The mod does not rewrite the game. It runs the **official multiplayer mode**, one copy per player, linked together as if they were playing online. You get exactly the same table, items, rules and results screen as an online match, plus the original match customization menu.
 
 | | |
 |---|---|
-| Version du jeu | v2.2.0.6 (Steam, Windows) |
-| Joueurs | 2 à 4 : un au clavier et à la souris, les autres à la manette |
-| Fichiers du jeu modifiés | aucun |
+| Game version | v2.2.0.6 (Steam, Windows) |
+| Players | 2 to 4: one on keyboard & mouse, the others on controllers |
+| Game files modified | none |
 
 ---
 
-## Installation
+## 📥 Installation
 
-1. Fermez le jeu.
-2. Double-cliquez sur **`Install.bat`**.
-   Le jeu est trouvé automatiquement grâce aux bibliothèques Steam. S'il n'est pas trouvé, l'installeur demande son dossier, que vous pouvez aussi donner directement :
+1. Close the game.
+2. Double-click **`Install.bat`**.
+   The game is found automatically through your Steam libraries. If it isn't, the installer asks for its folder, which you can also pass directly:
    ```
    Install.bat "D:\SteamLibrary\steamapps\common\Buckshot Roulette\Buckshot Roulette_windows"
    ```
-3. Lancez le jeu normalement depuis Steam. **LOCAL SPLITSCREEN** apparaît dans le menu principal, sous MULTIPLAYER.
+3. Start the game from Steam as usual. **LOCAL SPLITSCREEN** is now in the main menu.
 
-Ce que fait l'installeur :
-- il copie `mod\loader.gd` et `mod\splitscreen.pck` dans `<dossier du jeu>\splitscreen_mod\` ;
-- il ajoute une ligne `SplitMod=...` dans `<dossier du jeu>\override.cfg`. Le fichier est créé s'il n'existe pas ; s'il existe, il est complété et l'original est sauvegardé dans `override.cfg.before-splitscreen`.
+What the installer does:
+- copies `mod\loader.gd` and `mod\splitscreen.pck` to `<game folder>\splitscreen_mod\`;
+- adds a `SplitMod=...` line to `<game folder>\override.cfg`. The file is created if it doesn't exist. If it already holds other settings, they are kept and the original is backed up as `override.cfg.before-splitscreen`.
 
-Si Windows refuse l'écriture dans le dossier du jeu, faites un clic droit sur `Install.bat` puis « Exécuter en tant qu'administrateur ».
+If Windows refuses to write to the game folder, right-click `Install.bat` and choose "Run as administrator".
 
-## Désinstallation
+### Uninstall
 
-Double-cliquez sur **`Uninstall.bat`** (même argument optionnel que l'installeur). Il :
-- retire la ligne du mod dans `override.cfg`, et supprime ce fichier s'il ne contenait que le mod ;
-- supprime `splitscreen_mod\` et la sauvegarde `override.cfg.before-splitscreen`.
+Double-click **`Uninstall.bat`** (same optional argument as the installer). It:
+- removes the mod's line from `override.cfg`, and deletes the file if the mod was the only thing in it;
+- deletes `splitscreen_mod\` and the `override.cfg.before-splitscreen` backup.
 
-Le dossier du jeu revient exactement à son état d'origine.
+The game folder goes back to exactly how it was.
 
 ---
 
-## Utilisation
+## 🎮 How to play
 
-### Lancer une partie
+### Starting a match
 
-1. Dans le menu principal, choisissez **LOCAL SPLITSCREEN**.
-2. Chaque joueur rejoint avec son propre périphérique. Le premier inscrit est le joueur 1, l'hôte de la partie.
-3. Si vous le souhaitez, personnalisez la partie avec **CUSTOMIZE MATCH SETTINGS**.
-4. Choisissez **START**. Il faut au moins 2 joueurs.
+1. In the main menu, pick **LOCAL SPLITSCREEN**.
+2. Each player joins with their own device. The first one to join is player 1, the host of the match.
+3. Optionally, set up the match with **CUSTOMIZE MATCH SETTINGS**.
+4. Pick **START**. At least 2 players are needed.
 
-### Contrôles du lobby
+### Lobby controls
 
-| Action | Clavier / souris | Manette |
+| Action | Keyboard / mouse | Controller |
 |---|---|---|
-| Rejoindre | Entrée, Espace ou clic gauche | A |
-| Quitter le lobby | Retour arrière | B |
-| Changer de ligne | Flèches haut / bas | Croix haut / bas ou stick gauche |
-| Valider | Entrée ou clic | A |
-| Lancer la partie | Ligne START | Ligne START ou bouton Start |
-| Retour au menu principal | Échap ou ligne BACK | Ligne BACK |
+| Join | Enter, Space or left click | A |
+| Leave the lobby | Backspace | B |
+| Move between rows | Up / Down arrows | D-pad up / down or left stick |
+| Confirm | Enter or click | A |
+| Start the match | START row | START row or Start button |
+| Back to the main menu | Escape or BACK row | BACK row |
 
-Il n'y a qu'un seul joueur clavier et souris ; chaque autre joueur utilise une manette. Si une manette est débranchée dans le lobby, son joueur est retiré.
+There is only one keyboard & mouse player; every other player uses a controller. If a controller is unplugged in the lobby, its player is removed.
 
-### Personnaliser la partie
+### Customizing the match
 
-**CUSTOMIZE MATCH SETTINGS** ouvre l'écran de personnalisation d'origine du multijoueur, sans modification, avec tous ses réglages :
-- nombre de manches, et la manche dont on modifie les réglages ;
-- passer l'intro ;
-- santé de départ ;
-- pour chacun des 9 objets : maximum par joueur, maximum sur la table, présent ou non ;
-- pour chacune des 4 séquences de cartouches : nombre de cartouches à blanc, de vraies cartouches et d'objets distribués ;
-- revenir aux réglages par défaut.
+**CUSTOMIZE MATCH SETTINGS** opens the multiplayer's own customization screen, unchanged, with all of its settings:
+- number of rounds, and which round you are editing;
+- skip intro;
+- starting health;
+- for each of the 9 items: max per player, max on the table, enabled or not;
+- for each of the 4 shell sequences: number of blanks, lives and items dealt;
+- reset to defaults.
 
-« Save changes and return » enregistre les réglages et ramène au lobby écran partagé ; « Cancel changes » y ramène sans rien changer. L'écran se pilote à la souris comme à la manette, comme dans le jeu.
+"Save changes and return" saves and brings you back to the splitscreen lobby; "Cancel changes" goes back without changing anything. The screen works with the mouse and with a controller, just like in the game.
 
-Le lobby affiche ensuite un résumé des réglages, avec les mêmes intitulés que le lobby en ligne : nombre de manches, intro passée, éléments personnalisés. Ces réglages sont partagés avec le lobby multijoueur en ligne et restent valables jusqu'à la fermeture du jeu, comme dans le jeu d'origine.
+The lobby then shows a summary of the settings, with the same wording as the online lobby: number of rounds, intro skipped, customized items. These settings are shared with the online multiplayer lobby and last until the game is closed, as in the original game.
 
-### En partie
+### In a match
 
-- **Disposition** : à 2 joueurs, les vues sont côte à côte et le nom et le périphérique de chaque joueur restent affichés au-dessus de sa vue. À 3 ou 4 joueurs, les vues sont en grille 2 × 2 et ces informations s'affichent quelques secondes en haut de chaque vue.
-- **Contrôles** : ce sont ceux du jeu.
-  - Clavier et souris : clic pour interagir, clic droit maintenu pour regarder autour, Échap pour le menu pause. Le curseur reste dans la vue de son joueur.
-  - Manette : croix directionnelle pour choisir, A pour valider, gâchette gauche pour regarder autour, Start pour le menu pause.
-- **Pause** : chaque joueur a son propre menu pause. « Disconnect » arrête la partie pour tout le monde et ramène au lobby écran partagé.
-- **Son** : on entend la partie depuis la place du joueur 1.
-- **Manette débranchée** : la vue du joueur l'indique ; il reprend la partie dès que la manette est rebranchée.
-- **Fin de partie** : après l'écran des résultats, tout le monde revient au lobby écran partagé, prêt pour une revanche.
+- **Layout**: with 2 players the views sit side by side, and each player's name and device stay visible above their view. With 3 or 4 players the views are in a 2 × 2 grid, and that info shows for a few seconds at the top of each view.
+- **Controls** are the game's own:
+  - Keyboard & mouse: click to interact, hold right click to look around, Escape for the pause menu. The cursor stays inside its player's view.
+  - Controller: D-pad to choose, A to confirm, left trigger to look around, Start for the pause menu.
+- **Pause**: every player has their own pause menu. "Disconnect" ends the match for everyone and goes back to the splitscreen lobby.
+- **Sound**: you hear the match from player 1's seat.
+- **Unplugged controller**: that player's view says so, and they pick up where they left off as soon as it is plugged back in.
+- **End of the match**: after the results screen, everyone goes back to the splitscreen lobby, ready for a rematch.
 
 ---
 
-## Fonctionnement technique
+## 🔧 Under the Hood
 
-### Vue d'ensemble
+### Overview
 
 ```
- Fenêtre du jeu
+ Game window
  ┌──────────────────────────────┬──────────────────────────────┐
- │ Vue joueur 1  (960 × 540)    │ Vue joueur 2  (960 × 540)    │
- │ SubViewport + monde 3D       │ SubViewport + monde 3D       │
- │   └ mp_main  → HÔTE          │   └ mp_main  → CLIENT        │
+ │ Player 1 view  (960 × 540)   │ Player 2 view  (960 × 540)   │
+ │ SubViewport + own 3D world   │ SubViewport + own 3D world   │
+ │   └ mp_main  → HOST          │   └ mp_main  → CLIENT        │
  └──────────────┬───────────────┴──────────────┬───────────────┘
-                └─── bus de paquets en mémoire ┘   (remplace Steam P2P)
+                └──── in-memory packet bus ────┘   (replaces Steam P2P)
 
- clavier + souris ──► vue du joueur clavier      manette n ──► vue de son joueur
+ keyboard + mouse ──► keyboard player's view     controller n ──► its player's view
 ```
 
-### Le point de départ : le multijoueur du jeu
+### Starting point: the game's own multiplayer
 
-Buckshot Roulette est fait avec **Godot 4.1.1**. Ses scripts GDScript sont stockés dans un pack (`.pck`) intégré à `Buckshot Roulette.exe`.
+Buckshot Roulette is made with **Godot 4.1.1**. Its GDScript scripts live in a pack (`.pck`) embedded in `Buckshot Roulette.exe`.
 
-Le mode multijoueur (`res://multiplayer/`) suppose **un joueur local par instance du jeu** :
-- chaque instance crée les sièges de tous les joueurs autour de la table, mais ne contrôle que le sien ;
-- l'instance de l'hôte valide chaque action (prendre le fusil, tirer, utiliser un objet) puis diffuse le résultat à tout le monde ;
-- les instances communiquent par paquets Steam P2P.
+The multiplayer mode (`res://multiplayer/`) assumes **one local player per game instance**:
+- every instance creates the seats of all the players around the table, but only controls its own;
+- the host's instance validates every action (taking the shotgun, shooting, using an item) and broadcasts the result to everyone;
+- instances talk to each other through Steam P2P packets.
 
-Le mod recrée cette situation, mais dans un seul processus.
+The mod recreates that situation inside a single process.
 
-### Chargement du mod
+### Loading the mod
 
-1. Au démarrage, Godot lit `override.cfg` dans le dossier de l'exécutable. Le mod y déclare l'autoload `SplitMod`, qui pointe vers `splitscreen_mod/loader.gd`.
-2. `loader.gd` s'exécute avant le chargement du menu principal. Il calcule le MD5 des 30 scripts du jeu que le mod remplace et le compare à ceux de la v2.2.0.6.
-3. S'ils correspondent, il monte `splitscreen.pck` avec `ProjectSettings.load_resource_pack(..., replace_files = true)`. Les scripts du pack prennent alors la place des originaux, et les scènes du jeu les utilisent sans être modifiées.
-4. S'ils ne correspondent pas (mise à jour du jeu), il ne charge rien : le jeu tourne normalement, sans l'entrée LOCAL SPLITSCREEN.
+1. On startup, Godot reads `override.cfg` next to the executable. The mod declares the `SplitMod` autoload there, pointing to `splitscreen_mod/loader.gd`.
+2. `loader.gd` runs before the main menu loads. It computes the MD5 of the 30 game scripts the mod replaces and compares them with v2.2.0.6.
+3. If they match, it mounts `splitscreen.pck` with `ProjectSettings.load_resource_pack(..., replace_files = true)`. The pack's scripts take the place of the originals, and the game's scenes use them without being modified.
+4. If they don't (the game was updated), it loads nothing: the game runs normally, without the LOCAL SPLITSCREEN entry.
 
-### Une copie du match par joueur
+### One copy of the match per player
 
-Au lancement d'une partie, la scène de session crée, pour chaque joueur :
-- un `SubViewport` de **960 × 540**, la résolution de rendu d'origine du jeu, avec `own_world_3d` : rendu, physique, caméra et environnement sont séparés ;
-- une copie complète de la scène multijoueur `mp_main`, chargée **sans cache** (`CACHE_MODE_IGNORE`), pour que chaque copie possède ses propres meshes, matériaux et animations.
+When a match starts, the session scene creates, for each player:
+- a **960 × 540** `SubViewport` (the game's original render resolution) with `own_world_3d`, so rendering, physics, camera and environment are separate;
+- a full copy of the multiplayer scene `mp_main`, loaded **without cache** (`CACHE_MODE_IGNORE`) so every copy owns its meshes, materials and animations.
 
-Les ressources externes que le match modifie en cours de partie (l'`Environment` pour la saturation à la mort et le flash du défibrillateur, l'écran du brouilleur, l'écran du téléphone) sont dupliquées pour chaque copie. Ainsi, rien de ce qui arrive sur l'écran d'un joueur ne déteint sur celui d'un autre.
+External resources the match edits at runtime (the `Environment` used for the death desaturation and the defibrillator flash, the jammer screen, the phone screen) are duplicated for each copy, so nothing happening on one player's screen leaks onto another's.
 
-La copie du joueur 1 est l'**hôte**, les autres sont des **clients**, exactement comme en ligne.
+Player 1's copy is the **host**, the others are **clients**, exactly like online.
 
-### Le réseau remplacé par un bus en mémoire
+### The network, replaced by an in-memory bus
 
-- `PacketManager.send_p2p_packet()` appelle `SplitMod.send_packet()`. Le paquet est sérialisé (`var_to_bytes`) puis déposé dans la file de chaque destinataire : tous les autres joueurs pour la cible `0`, sinon le joueur visé.
-- Chaque copie lit **un paquet par image**, comme le jeu le fait avec `Steam.readP2PPacket()`, avec les mêmes contrôles : un client n'accepte que les paquets de l'hôte.
-- Tout le reste est le code d'origine : attente des joueurs, création des sièges, manches, distribution des objets, validation des actions par l'hôte et statistiques de fin de partie.
+- `PacketManager.send_p2p_packet()` calls `SplitMod.send_packet()`. The packet is serialized (`var_to_bytes`) and dropped into the queue of each recipient: every other player for target `0`, otherwise the targeted player.
+- Each copy reads **one packet per frame**, like the game does with `Steam.readP2PPacket()`, with the same checks: a client only accepts packets from the host.
+- Everything else is the original code: waiting for players, seat creation, rounds, item dealing, host-side validation and end-of-match statistics.
 
-### Ce qui était global devient propre à chaque joueur
+### What was global becomes per player
 
-Dans un seul processus, les singletons du jeu sont partagés par toutes les copies. Les scripts du match sont donc modifiés pour demander à `SplitMod` les valeurs qui doivent dépendre du joueur :
+In a single process, the game's singletons are shared by every copy. The match scripts are therefore patched to ask `SplitMod` for the values that must depend on the player:
 
-| Code d'origine | Remplacé par | Effet en écran partagé |
+| Original code | Replaced with | Effect in splitscreen |
 |---|---|---|
-| `GlobalSteam.STEAM_ID` | `SplitMod.sid(self)` | Identifiant du joueur local de cette copie |
-| `get_node("/root/mp_main/...")` | `SplitMod.mp_root(self).get_node(...)` | La scène `mp_main` de cette copie |
-| `Input.set_mouse_mode`, `Input.set_custom_mouse_cursor` | `SplitMod.set_mouse_mode`, `SplitMod.set_custom_mouse_cursor` | Seule la copie du joueur clavier et souris pilote le curseur |
-| `AudioServer.set_bus_volume_db`, `AudioServer.get_bus_effect` | `SplitMod.set_bus_volume_db`, `SplitMod.get_bus_effect` | Seule la copie du joueur 1 règle volumes et filtre passe-bas |
-| `Steam.getFriendPersonaName`, `Steam.getPlayerAvatar` | `SplitMod.persona_name`, `SplitMod.get_player_avatar` | Noms « PLAYER 1 » à « PLAYER 4 » |
-| `GlobalVariables.cursor_state_after_toggle` | `SplitMod.gv(self).cursor_state_after_toggle` | État du curseur propre à chaque joueur |
-| `change_scene_to_file(mp_lobby)` | `SplitMod.change_scene(...)` | Fin de partie : retour au lobby écran partagé |
+| `GlobalSteam.STEAM_ID` | `SplitMod.sid(self)` | ID of this copy's local player |
+| `get_node("/root/mp_main/...")` | `SplitMod.mp_root(self).get_node(...)` | This copy's `mp_main` scene |
+| `Input.set_mouse_mode`, `Input.set_custom_mouse_cursor` | `SplitMod.set_mouse_mode`, `SplitMod.set_custom_mouse_cursor` | Only the keyboard & mouse player's copy drives the cursor |
+| `AudioServer.set_bus_volume_db`, `AudioServer.get_bus_effect` | `SplitMod.set_bus_volume_db`, `SplitMod.get_bus_effect` | Only player 1's copy sets volumes and the low-pass filter |
+| `Steam.getFriendPersonaName`, `Steam.getPlayerAvatar` | `SplitMod.persona_name`, `SplitMod.get_player_avatar` | Names "PLAYER 1" to "PLAYER 4" |
+| `GlobalVariables.cursor_state_after_toggle` | `SplitMod.gv(self).cursor_state_after_toggle` | Cursor state kept per player |
+| `change_scene_to_file(mp_lobby)` | `SplitMod.change_scene(...)` | End of match: back to the splitscreen lobby |
 
-`SplitMod` retrouve la copie d'un nœud en remontant jusqu'au `SubViewport` qui le contient. Pendant une partie en écran partagé, il ignore aussi les rappels de lobby Steam (invitations, changements de membres), qui sinon écraseraient la liste des joueurs.
+`SplitMod` finds which copy a node belongs to by walking up to the `SubViewport` that contains it. During a splitscreen match it also ignores Steam lobby callbacks (invites, member changes), which would otherwise overwrite the player list.
 
-**Hors écran partagé, chaque appel renvoie exactement la valeur d'origine** : le multijoueur en ligne utilise les mêmes scripts sans changement de comportement.
+**Outside splitscreen, every call returns exactly the original value**: online multiplayer runs the same scripts with no change in behavior.
 
-Ces modifications sont appliquées par `tools/build.js` sous forme de remplacements exacts, dont le nombre d'occurrences est vérifié. Si le code du jeu change, la compilation s'arrête et indique le fichier en cause, au lieu de produire un mod cassé.
+These patches are applied by `tools/build.js` as exact replacements whose number of occurrences is checked. If the game's code changes, the build stops and names the file at fault instead of producing a broken mod.
 
-### Entrées
+### Input
 
-Toutes les entrées arrivent à la fenêtre principale. La scène de session les intercepte (`_input`), les marque comme traitées, puis les transmet au `SubViewport` du bon joueur avec `push_input` :
-- clavier et souris vers le joueur clavier et souris (le clavier va au joueur 1 s'il n'y en a pas) ;
-- chaque manette vers le joueur qui l'a inscrite.
+All input reaches the main window. The session scene intercepts it (`_input`), marks it as handled, then forwards it to the right player's `SubViewport` with `push_input`:
+- keyboard and mouse go to the keyboard & mouse player (the keyboard goes to player 1 if there is none);
+- each controller goes to the player who joined with it.
 
-Pour la souris :
-- la position est convertie dans les coordonnées 960 × 540 de la vue du joueur, et le curseur est maintenu dans cette vue ;
-- le mouvement relatif, utilisé pour regarder autour de soi, est mis à la même échelle que dans le jeu d'origine, pour garder la même sensibilité.
+For the mouse:
+- the position is converted to the 960 × 540 coordinates of the player's view, and the cursor is kept inside that view;
+- relative motion, used to look around, is scaled like in the original game so the sensitivity is the same.
 
-Chaque `SubViewport` garde son propre focus d'interface : les manettes naviguent dans les invites du jeu indépendamment les unes des autres.
+Each `SubViewport` keeps its own UI focus, so controllers navigate the game's prompts independently of each other.
 
-### Image et son
+### Picture and sound
 
-- Pendant la partie, la fenêtre passe en résolution native (`content_scale_mode = DISABLED`). Chaque vue est rendue en 960 × 540, puis affichée à l'échelle avec des bandes noires si besoin. Les réglages de rendu (anticrénelage, ombres, filtrage) sont copiés de la fenêtre du jeu.
-- Toutes les copies jouent les mêmes événements au même moment. Seul le `SubViewport` du joueur 1 a donc ses écouteurs audio 2D et 3D actifs, ce qui évite d'entendre chaque son en double.
+- During the match, the window switches to native resolution (`content_scale_mode = DISABLED`). Each view renders at 960 × 540 and is scaled up, letterboxed if needed. Render settings (anti-aliasing, shadows, filtering) are copied from the game's window.
+- Every copy plays the same events at the same time, so only player 1's `SubViewport` has its 2D and 3D audio listeners active, which keeps every sound from playing twice.
 
-### Menu, lobby et personnalisation
+### Menu, lobby and customization
 
-- `MenuManager.gd` ajoute l'entrée LOCAL SPLITSCREEN en dupliquant le bouton MULTIPLAYER. Elle a ainsi la même police, les mêmes sons, le même survol et la même navigation à la manette ; les boutons suivants sont décalés d'une ligne.
-- Le lobby écran partagé est construit par code avec les polices, sons et musique du jeu. Il gère l'inscription par périphérique.
-- **CUSTOMIZE MATCH SETTINGS** ouvre la vraie scène du lobby multijoueur (`mp_lobby`) avec `SplitMod.customizing` activé. `MP_LobbyUI.gd` passe alors directement à l'écran de personnalisation, sans lobby Steam. Quitter cet écran (`ExitMatchCustomization`) ramène au lobby écran partagé au lieu de l'accueil du lobby en ligne. Le reste est le code d'origine : l'écran enregistre ses réglages dans `GlobalVariables.stashed_match_customization_dictionary`, comme pour l'hôte d'une partie en ligne.
-- Au lancement d'une partie, ces réglages deviennent le dictionnaire de match actif. Le nombre de manches et l'intro sont appliqués comme le fait le lobby en ligne.
-- En fin de partie, la session restaure tout ce qu'elle avait changé : identifiants et membres Steam, personnalisation active, volumes et filtre audio, mode d'affichage, curseur. Elle revient ensuite au lobby.
+- `MenuManager.gd` adds the LOCAL SPLITSCREEN entry by duplicating the MULTIPLAYER button, so it has the same font, sounds, hover and controller navigation; the buttons below are shifted down one row.
+- The splitscreen lobby is built in code with the game's fonts, sounds and music, and handles joining per device.
+- **CUSTOMIZE MATCH SETTINGS** opens the real multiplayer lobby scene (`mp_lobby`) with `SplitMod.customizing` set. `MP_LobbyUI.gd` then goes straight to the customization screen, without a Steam lobby. Leaving that screen (`ExitMatchCustomization`) returns to the splitscreen lobby instead of the online lobby's home. The rest is original code: the screen saves its settings to `GlobalVariables.stashed_match_customization_dictionary`, as it does for the host of an online match.
+- When a match starts, those settings become the active match dictionary. The number of rounds and the intro are applied the way the online lobby does it.
+- At the end of the match, the session restores everything it changed: Steam IDs and members, active customization, volumes and audio filter, display mode, cursor. Then it goes back to the lobby.
 
-### Quitter une partie sans plantage
+### Leaving a match without crashing
 
-Godot 4.1 présente deux pièges quand on libère une scène aussi grosse qu'une copie du match :
-- un contrôle qui a encore le focus ou le survol (par exemple le bouton du menu pause qu'on vient de presser) programme un rafraîchissement différé en quittant l'arbre. Ce rafraîchissement s'exécute ensuite sur le contrôle déjà libéré, ce qui provoque un plantage intermittent ;
-- les coroutines du jeu appellent `get_tree().create_timer()` : si le nœud est sorti de l'arbre, ce `get_tree()` est nul, et la version publiée du moteur plante au lieu de signaler l'erreur.
+Godot 4.1 has two traps when freeing a scene as large as a copy of the match:
+- a control that still has focus or hover (for example the pause-menu button that was just pressed) queues a deferred redraw as it leaves the tree. That redraw then runs on the already freed control, which causes an intermittent crash;
+- the game's coroutines call `get_tree().create_timer()`: if the node has left the tree, that `get_tree()` is null, and the shipped engine crashes instead of reporting the error.
 
-La session se termine donc par étapes :
-1. Les entrées sont coupées, le focus et le survol sont retirés de chaque vue, et la fenêtre et le curseur sont restaurés.
-2. Le moteur dispose de deux images pour exécuter le travail programmé, pendant que tout existe encore.
-3. Le focus est retiré une seconde fois, puis la scène est changée : les copies sont libérées à l'intérieur de l'arbre, jamais détachées avant.
+So the session shuts down in stages:
+1. Input is cut, focus and hover are released in every view, and the window and cursor are restored.
+2. The engine gets two frames to run queued work while everything still exists.
+3. Focus is released once more, then the scene is changed: the copies are freed inside the tree, never detached first.
 
-La fermeture de la fenêtre pendant une partie passe par le même chemin (`auto_accept_quit` est désactivé pendant la session). Le passage du menu principal au lobby et le retour depuis l'écran de personnalisation retirent eux aussi focus et survol avant de changer de scène.
-
----
-
-## Après une mise à jour du jeu
-
-Si une mise à jour modifie l'un des scripts remplacés, le mod se désactive tout seul au lancement. Le jeu reste jouable, sans l'entrée LOCAL SPLITSCREEN. Pour le remettre en service, recompilez le mod (voir [Développement](#développement)) puis relancez `Install.bat`.
-
-## État du projet
-
-Vérifié dans une copie isolée du jeu, à 2 joueurs (souris pour le joueur 1, manette simulée pour le joueur 2) :
-- l'entrée du menu principal, sa navigation à la manette et le passage au lobby ;
-- le lobby : inscription et retour au menu ;
-- l'écran de personnalisation d'origine, piloté à la souris et à la manette, avec des réglages bien appliqués à la partie suivante ;
-- le démarrage de la partie et la synchronisation des vues ;
-- la distribution d'objets, la prise du fusil, les tirs, les dégâts et le passage des tours ;
-- la fin de partie : écran des résultats puis retour au lobby ;
-- « Disconnect » depuis le menu pause, avec les vrais boutons, pour le joueur 1 (souris) comme pour le joueur 2 (manette), y compris pendant l'écran des résultats ;
-- la fermeture de la fenêtre en pleine partie ;
-- le lobby multijoueur en ligne, qui se comporte comme dans le jeu d'origine (accueil, personnalisation, annulation) ;
-- l'installation et la désinstallation, avec et sans `override.cfg` existant.
-
-Une partie complète à 2 joueurs (souris + vraie manette) a aussi été jouée sur la version installée.
-
-Pas encore vérifié :
-- 3 et 4 joueurs ;
-- une partie en ligne complète avec le mod installé.
+Closing the window during a match goes through the same path (`auto_accept_quit` is turned off during the session). Going from the main menu to the lobby and returning from the customization screen also release focus and hover before changing scenes.
 
 ---
 
-## Développement
+## 🔄 After a game update
 
-### Compiler le mod
+If an update changes one of the replaced scripts, the mod turns itself off at launch. The game stays playable, just without the LOCAL SPLITSCREEN entry. To bring it back, rebuild the mod (see [Development](#%EF%B8%8F-development)) and run `Install.bat` again.
 
-Il faut **Node.js 18** ou plus récent.
+## ✅ Project status
+
+Checked in an isolated copy of the game, with 2 players (mouse for player 1, simulated controller for player 2):
+- the main menu entry, its controller navigation and the switch to the lobby;
+- the lobby: joining and going back to the menu;
+- the original customization screen, driven with the mouse and with a controller, with the settings applied to the next match;
+- starting a match and keeping the views in sync;
+- item dealing, taking the shotgun, shooting, damage and turn order;
+- the end of the match: results screen, then back to the lobby;
+- "Disconnect" from the pause menu through the real buttons, for player 1 (mouse) and player 2 (controller), including during the results screen;
+- closing the window mid-match;
+- the online multiplayer lobby, which behaves like the original game (home, customization, cancel);
+- installing and uninstalling, with and without an existing `override.cfg`.
+
+A full 2-player match (mouse + real controller) was also played on the installed version.
+
+Not checked yet:
+- 3 and 4 players;
+- a full online match with the mod installed.
+
+---
+
+## 🛠️ Development
+
+### Building the mod
+
+You need **Node.js 18** or newer.
 
 ```
-node tools/build.js ["chemin\vers\Buckshot Roulette.exe"]
+node tools/build.js ["path\to\Buckshot Roulette.exe"]
 ```
 
-Sans argument, le jeu est cherché à son emplacement Steam par défaut. Le script :
-1. lit les scripts originaux directement dans le pack intégré à l'exe et les place dans `build\original` ;
-2. applique les modifications, en vérifiant le nombre exact d'occurrences de chacune ;
-3. ajoute les fichiers de `src\pack\` ;
-4. écrit `mod\splitscreen.pck`, ainsi que `mod\loader.gd` avec les MD5 des scripts originaux remplacés.
+Without an argument, the game is looked up at its default Steam location. The script:
+1. reads the original scripts straight from the pack embedded in the exe and puts them in `build\original`;
+2. applies the patches, checking the exact number of occurrences of each one;
+3. adds the files from `src\pack\`;
+4. writes `mod\splitscreen.pck`, and `mod\loader.gd` with the MD5 of the original scripts it replaces.
 
-Aucun fichier du jeu n'est stocké dans le dépôt : `build\` est ignoré par Git.
+No extracted game file is stored in the repository: `build\` is ignored by Git.
 
-### Structure du dépôt
+### Repository layout
 
-| Chemin | Rôle |
+| Path | Role |
 |---|---|
-| `Install.bat`, `Uninstall.bat` | Lanceurs de l'installeur et du désinstalleur |
-| `installer\` | Scripts PowerShell : recherche du jeu, copie des fichiers, gestion de `override.cfg` |
-| `mod\` | Le mod compilé, c'est-à-dire ce qui est installé dans le jeu |
-| `src\loader.gd` | Autoload `SplitMod` : vérification de version, chargement du pack, contexte par joueur, bus de paquets |
-| `src\menu_additions.gd` | Entrée LOCAL SPLITSCREEN, ajoutée à la fin de `MenuManager.gd` |
-| `src\lobby_ui_additions.gd` | Mode « personnalisation seule » du lobby multijoueur, ajouté à la fin de `MP_LobbyUI.gd` |
-| `src\pack\mods\splitscreen\split_lobby.*` | Lobby : inscription des joueurs, accès à la personnalisation, résumé des réglages |
-| `src\pack\mods\splitscreen\split_session.*` | Partie : vues, chargement des copies du match, routage des entrées, fin de partie par étapes |
-| `tools\build.js` | Modifications des scripts du jeu et compilation du mod |
-| `tools\pck.js`, `tools\mkpck.js` | Lecture et écriture des packs Godot 4.1 (format PCK v2) |
-| `tools\mp_main_scripts.txt` | Liste des scripts utilisés par la scène multijoueur |
-| `tools\deps.js`, `tools\nodes.js` | Analyse des scènes du jeu, une fois converties en texte |
-| `tools\godot\` | Scripts exécutés par le moteur du jeu : conversion des scènes, vérification de compilation, test automatique |
+| `Install.bat`, `Uninstall.bat` | Launchers for the installer and the uninstaller |
+| `installer\` | PowerShell scripts: finding the game, copying files, editing `override.cfg` |
+| `mod\` | The built mod, i.e. what gets installed into the game |
+| `src\loader.gd` | `SplitMod` autoload: version check, pack loading, per-player context, packet bus |
+| `src\menu_additions.gd` | LOCAL SPLITSCREEN entry, appended to `MenuManager.gd` |
+| `src\lobby_ui_additions.gd` | "Customization only" mode of the multiplayer lobby, appended to `MP_LobbyUI.gd` |
+| `src\pack\mods\splitscreen\split_lobby.*` | Lobby: joining, access to customization, settings summary |
+| `src\pack\mods\splitscreen\split_session.*` | Match: views, loading the match copies, input routing, staged shutdown |
+| `tools\build.js` | Patching the game's scripts and building the mod |
+| `tools\pck.js`, `tools\mkpck.js` | Reading and writing Godot 4.1 packs (PCK format v2) |
+| `tools\mp_main_scripts.txt` | List of the scripts used by the multiplayer scene |
+| `tools\deps.js`, `tools\nodes.js` | Analysis of the game's scenes once converted to text |
+| `tools\godot\` | Scripts run by the game's engine: scene conversion, compile check, automated test |
+| `res\` | README banner |
 
-### Tester sans toucher au jeu installé
+### Testing without touching the installed game
 
-1. Copiez `Buckshot Roulette.exe` et `steam_api64.dll` dans un dossier de test.
-2. Lancez `Install.bat "<dossier de test>"`.
-3. Ajoutez au `override.cfg` de ce dossier :
+1. Copy `Buckshot Roulette.exe` and `steam_api64.dll` to a test folder.
+2. Run `Install.bat "<test folder>"`.
+3. Add to that folder's `override.cfg`:
    ```
    [application]
    config/use_custom_user_dir=true
    config/custom_user_dir_name="BuckshotSplitTest"
    ```
-   Sauvegardes et journaux iront dans `%APPDATA%\BuckshotSplitTest`, séparés de ceux du jeu.
-4. Pour le test automatique, ajoutez sous `[autoload]` :
+   Saves and logs then go to `%APPDATA%\BuckshotSplitTest`, apart from the game's own.
+4. For the automated test, add under `[autoload]`:
    ```
-   SplitTest="*<chemin du dépôt>/tools/godot/split_test.gd"
+   SplitTest="*<repository path>/tools/godot/split_test.gd"
    ```
 
-Lancements utiles depuis Git Bash (journal dans `%APPDATA%\BuckshotSplitTest\logs\godot.log`) :
+Useful runs from Git Bash (log in `%APPDATA%\BuckshotSplitTest\logs\godot.log`):
 
-| Commande | Effet |
+| Command | Effect |
 |---|---|
-| `SPLIT_TEST_MODE=menu "Buckshot Roulette.exe" --headless` | Vérifie l'entrée du menu et le lobby, sans fenêtre |
-| `SPLIT_TEST_MODE=session "Buckshot Roulette.exe" --windowed` | Joue une partie à 2 joueurs avec des entrées simulées (souris et manette) |
-| `SPLIT_TEST_MODE=disconnect_real SPLIT_TEST_DISCONNECT=1` (ou `2`) | Le joueur 1 (Échap + clics) ou 2 (Start, croix, A) quitte la partie par les vrais boutons du menu pause |
-| `SPLIT_TEST_MODE=conclusion`, avec ou sans `SPLIT_TEST_DISCONNECT=1` / `2` | L'hôte termine la partie (écran des résultats), avec éventuellement une déconnexion pendant les résultats |
-| `SPLIT_TEST_MODE=custom_visual` | Lobby et écran de personnalisation (manette), puis une partie avec les réglages enregistrés |
-| `SPLIT_TEST_MODE=online_lobby` avec `--headless` | Vérifie que le lobby multijoueur en ligne n'a pas changé |
-| `CHECK_LIST=<liste.txt> "Buckshot Roulette.exe" --headless --script <chemin absolu>/tools/godot/compile_check.gd` | Compile dans le moteur du jeu les scripts listés (un chemin `res://` par ligne) |
+| `SPLIT_TEST_MODE=menu "Buckshot Roulette.exe" --headless` | Checks the menu entry and the lobby, without a window |
+| `SPLIT_TEST_MODE=session "Buckshot Roulette.exe" --windowed` | Plays a 2-player match with simulated input (mouse and controller) |
+| `SPLIT_TEST_MODE=disconnect_real SPLIT_TEST_DISCONNECT=1` (or `2`) | Player 1 (Escape + clicks) or player 2 (Start, D-pad, A) leaves through the real pause-menu buttons |
+| `SPLIT_TEST_MODE=conclusion`, with or without `SPLIT_TEST_DISCONNECT=1` / `2` | The host ends the match (results screen), optionally with a disconnect during the results |
+| `SPLIT_TEST_MODE=custom_visual` | Lobby and customization screen (controller), then a match with the saved settings |
+| `SPLIT_TEST_MODE=online_lobby` with `--headless` | Checks that the online multiplayer lobby is unchanged |
+| `SPLIT_TEST_SHOTS=<folder>` (add `SPLIT_TEST_VIEWS=1` for each player's view) | Saves screenshots during any of the runs above |
+| `CHECK_LIST=<list.txt> "Buckshot Roulette.exe" --headless --script <absolute path>/tools/godot/compile_check.gd` | Compiles the listed scripts (one `res://` path per line) in the game's engine |
 
 ---
 
-## Note
+## ⚖️ Notice
 
-`mod\splitscreen.pck` contient des copies modifiées de scripts du jeu, qui restent la propriété de leurs auteurs. Ce dépôt est destiné à un usage privé : ne redistribuez pas le mod sans leur accord.
+MoreRollers is a fan-made mod, not affiliated with the developer or the publisher of Buckshot Roulette. You need your own copy of the game on Steam.
+
+`mod\splitscreen.pck` contains modified copies of some of the game's scripts, which remain the property of their authors.
