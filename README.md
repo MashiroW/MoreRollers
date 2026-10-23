@@ -3,6 +3,7 @@
 # MoreRollers - Local Splitscreen for Buckshot Roulette
 *A mod that adds **local splitscreen multiplayer** to **Buckshot Roulette**: 2 to 4 players on a single PC, each with their own view, playing the game's real multiplayer match.*
 
+<img width="1920" height="1080" alt="Screenshot Buckshot MoreRollers" src="https://github.com/user-attachments/assets/3e78d16b-9745-4dad-8d43-f438187bad4b" />
 ---
 
 ## 📌 What it does
