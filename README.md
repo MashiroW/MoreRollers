@@ -1,6 +1,9 @@
 ![MoreRollers](./res/banner.png?raw=true "MoreRollers")
 
 # MoreRollers - Local Splitscreen for Buckshot Roulette
+
+[![Version](https://img.shields.io/badge/version-1.0-2ea44f?style=for-the-badge)](https://github.com/MashiroW/MoreRollers) [![Windows](https://img.shields.io/badge/Windows-0078D6?style=for-the-badge&logo=data:image/svg%2bxml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0id2hpdGUiIGQ9Ik0wIDBoMTF2MTFIMHpNMTMgMGgxMXYxMUgxM3pNMCAxM2gxMXYxMUgwek0xMyAxM2gxMXYxMUgxM3oiLz48L3N2Zz4=&logoColor=white)](#) [![Stars](https://img.shields.io/github/stars/MashiroW/MoreRollers?style=for-the-badge&logo=github&color=e3b341)](https://github.com/MashiroW/MoreRollers/stargazers) [![Sponsor](https://img.shields.io/badge/Sponsor-%E2%9D%A4-EA4AAA?style=for-the-badge&logo=githubsponsors&logoColor=white)](https://github.com/sponsors/MashiroW)
+
 *A mod that adds **local splitscreen multiplayer** to **Buckshot Roulette**: 2 to 4 players on a single PC, each with their own view, playing the game's real multiplayer match.*
 
 <img width="1920" height="1080" alt="Screenshot Buckshot MoreRollers" src="https://github.com/user-attachments/assets/3e78d16b-9745-4dad-8d43-f438187bad4b" />
