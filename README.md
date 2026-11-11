@@ -383,6 +383,8 @@ Useful runs from Git Bash (log in `%APPDATA%\BuckshotSplitTest\logs\godot.log`):
 
 MoreRollers is free software, released under the **GNU General Public License v3.0** (see [LICENSE](LICENSE)): you can use, study, share and modify it, as long as what you share stays under the same license, with its source code.
 
+**Commercial or closed-source use:** if you want to use this project, or any part of it, in a proprietary or closed-source product without the GPL obligations, you need a separate commercial license. Contact me on the [MoreRollers Discord](https://discord.gg/R4tCHhVJD4) to get one.
+
 Questions, bugs, people to play with: join the [MoreRollers Discord](https://discord.gg/R4tCHhVJD4).
 
 MoreRollers is a fan-made mod, not affiliated with the developer or the publisher of Buckshot Roulette. You need your own copy of the game on Steam.
