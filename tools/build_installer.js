@@ -1,5 +1,5 @@
 // Builds dist/MoreRollers-Installer.exe: installer/MoreRollersInstaller.cs compiled with the C# compiler
-// that comes with Windows (.NET Framework 4), with the built mod (mod/) and the banner embedded.
+// that comes with Windows (.NET Framework 4), with the built mod (mod/) and the window font embedded.
 // Run `node tools/build.js` first so mod/ is up to date.
 //
 //   node tools/build_installer.js              -> dist/MoreRollers-Installer.exe
@@ -19,7 +19,7 @@ const csc = ['Framework64', 'Framework']
 if (!csc) throw new Error('csc.exe (.NET Framework 4) not found under ' + windir + '\\Microsoft.NET');
 
 const r = p => path.join(root, p);
-for (const f of ['mod/loader.gd', 'mod/splitscreen.pck', 'res/banner.png', 'installer/MoreRollers.ico', 'installer/app.manifest']) {
+for (const f of ['mod/loader.gd', 'mod/splitscreen.pck', 'installer/fonts/VT323-Regular.ttf', 'installer/MoreRollers.ico', 'installer/app.manifest']) {
   if (!fs.existsSync(r(f))) throw new Error('missing ' + f + (f.startsWith('mod/') ? ' (run node tools/build.js first)' : ''));
 }
 
@@ -50,10 +50,10 @@ const args = [
   '/win32manifest:' + r('installer/app.manifest'),
   '/resource:' + r('mod/loader.gd') + ',loader.gd',
   '/resource:' + r('mod/splitscreen.pck') + ',splitscreen.pck',
-  '/resource:' + r('res/banner.png') + ',banner.png',
+  '/resource:' + r('installer/fonts/VT323-Regular.ttf') + ',VT323-Regular.ttf',
   '/r:System.Windows.Forms.dll', '/r:System.Drawing.dll',
 ];
 if (snapshot) args.push('/define:SNAPSHOT');
-args.push(r('installer/MoreRollersInstaller.cs'), info);
+args.push(r('installer/MoreRollersInstaller.cs'), r('installer/TerminalWindow.cs'), info);
 execFileSync(csc, args, { stdio: 'inherit' });
 console.log('built', path.relative(root, out), '(' + fs.statSync(out).size + ' bytes, version ' + version + ')');

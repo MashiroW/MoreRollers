@@ -52,12 +52,14 @@ Everyone looks at the same screen: it is split into one view per person.
 
 1. Download **`MoreRollers-Installer.exe`** from the [latest release](https://github.com/MashiroW/MoreRollers/releases/latest).
 2. Close the game, then double-click the installer.
-   Windows may show "Windows protected your PC", because the installer isn't signed: click **More info**, then **Run anyway**. Its source code is in this repository (`installer\MoreRollersInstaller.cs`).
-3. The installer finds the game through Steam and checks that its version is supported. Click **Install**.
-   If the game isn't found, click **Browse...** and select `Buckshot Roulette.exe`. To find it in Steam: right-click Buckshot Roulette > **Manage** > **Browse local files**.
-4. Start the game from Steam as usual. **LOCAL SPLITSCREEN** is now in the main menu, right under MULTIPLAYER.
+   Windows may show "Windows protected your PC", because the installer isn't signed: click **More info**, then **Run anyway**. Its source code is in this repository (`installer\`).
+3. The installer finds the game through Steam and checks that its version is supported. Pick **INSTALL**: click it, or press Enter.
+   If the game isn't found, pick **CHANGE FOLDER** and select `Buckshot Roulette.exe`. To find it in Steam: right-click Buckshot Roulette > **Manage** > **Browse local files**.
+4. Start the game from Steam as usual, or pick **PLAY** in the installer. **LOCAL SPLITSCREEN** is now in the main menu, right under MULTIPLAYER.
 
-To **update** the mod, run the newer installer and click **Update**. To **uninstall** it, run the installer again and click **Uninstall**.
+<img src="./res/installer.png" alt="The MoreRollers installer" width="480">
+
+To **update** the mod, run the newer installer and pick **UPDATE**. To **uninstall** it, run the installer again and pick **UNINSTALL**. In the installer, the arrow keys and Tab move between the choices, Enter picks one, Escape closes it.
 
 ### Without the installer
 
@@ -321,7 +323,7 @@ No extracted game file is stored in the repository: `build\` is ignored by Git.
 node tools/build_installer.js
 ```
 
-Compiles `installer\MoreRollersInstaller.cs` into `dist\MoreRollers-Installer.exe` with the C# compiler that comes with Windows (.NET Framework 4), so nothing else needs to be installed. The built mod (`mod\`) and the banner are embedded in the exe, so build the mod first. The exe also works from the command line: `--install` or `--uninstall`, optionally followed by the game folder, and `--quiet` to show no message (exit code 0: done, 1: failed, 2: game not found).
+Compiles `installer\MoreRollersInstaller.cs` and `installer\TerminalWindow.cs` into `dist\MoreRollers-Installer.exe` with the C# compiler that comes with Windows (.NET Framework 4), so nothing else needs to be installed. The built mod (`mod\`) and the window's font are embedded in the exe, so build the mod first. The window is drawn by hand in the green of the game's online lobby: VT323 font, glow (the drawing shrunk then stretched back under itself), scanlines, and the checks typed out like a terminal. The exe also works from the command line: `--install` or `--uninstall`, optionally followed by the game folder, and `--quiet` to show no message (exit code 0: done, 1: failed, 2: game not found).
 
 ### Repository layout
 
@@ -329,7 +331,9 @@ Compiles `installer\MoreRollersInstaller.cs` into `dist\MoreRollers-Installer.ex
 |---|---|
 | `Install.bat`, `Uninstall.bat` | Launchers for the PowerShell installer and uninstaller |
 | `installer\*.ps1` | PowerShell scripts: finding the game, copying files, editing `override.cfg` |
-| `installer\MoreRollersInstaller.cs` | The installer exe: same steps as the scripts, plus the game version check, in a window |
+| `installer\MoreRollersInstaller.cs` | The installer exe: same steps as the scripts, plus the game version check and the command line |
+| `installer\TerminalWindow.cs` | The installer's window, drawn like a terminal in the green of the online lobby |
+| `installer\fonts\` | VT323, the installer's font, with its license (SIL Open Font License 1.1) |
 | `installer\app.manifest`, `installer\MoreRollers.ico` | The installer's manifest (runs as the user, sharp on high-dpi screens) and icon |
 | `mod\` | The built mod, i.e. what gets installed into the game |
 | `src\loader.gd` | `SplitMod` autoload: version check, pack loading, per-player context, packet bus |
@@ -344,7 +348,7 @@ Compiles `installer\MoreRollersInstaller.cs` into `dist\MoreRollers-Installer.ex
 | `tools\mp_main_scripts.txt` | List of the scripts used by the multiplayer scene |
 | `tools\deps.js`, `tools\nodes.js` | Analysis of the game's scenes once converted to text |
 | `tools\godot\` | Scripts run by the game's engine: scene conversion, compile check, automated test |
-| `res\` | README banner (also shown in the installer) |
+| `res\` | README banner and installer screenshot |
 | `LICENSE` | GNU General Public License v3.0 |
 
 ### Testing without touching the installed game
@@ -384,6 +388,8 @@ Useful runs from Git Bash (log in `%APPDATA%\BuckshotSplitTest\logs\godot.log`):
 MoreRollers is free software, released under the **GNU General Public License v3.0** (see [LICENSE](LICENSE)): you can use, study, share and modify it, as long as what you share stays under the same license, with its source code.
 
 **Commercial or closed-source use:** if you want to use this project, or any part of it, in a proprietary or closed-source product without the GPL obligations, you need a separate commercial license. Contact me on the [MoreRollers Discord](https://discord.gg/R4tCHhVJD4) to get one.
+
+The installer embeds the [VT323](https://fonts.google.com/specimen/VT323) font by Peter Hull, under the SIL Open Font License 1.1 (`installer\fonts\OFL.txt`).
 
 Questions, bugs, people to play with: join the [MoreRollers Discord](https://discord.gg/R4tCHhVJD4).
 

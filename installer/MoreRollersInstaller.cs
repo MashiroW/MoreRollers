@@ -13,8 +13,9 @@
 // not, see <https://www.gnu.org/licenses/>.
 //
 // Built by tools/build_installer.js with the C# compiler that comes with Windows (.NET Framework 4).
-// The mod (mod/loader.gd, mod/splitscreen.pck) and the banner are embedded in the exe as resources.
-// It does exactly what installer/install.ps1 and installer/uninstall.ps1 do.
+// The mod (mod/loader.gd, mod/splitscreen.pck) and the window's font are embedded in the exe as
+// resources. It does exactly what installer/install.ps1 and installer/uninstall.ps1 do; its window
+// is in TerminalWindow.cs.
 //
 // Command line, for scripts:
 //   MoreRollers-Installer.exe --install   ["<game folder>"] [--quiet]
@@ -348,327 +349,11 @@ namespace MoreRollers
         }
     }
 
-    // ================================================================ window
-
-    /// Draws an image scaled to fit, with good filtering (PictureBox scales it roughly).
-    class ImagePanel : Panel
-    {
-        public Image Image;
-
-        public ImagePanel()
-        {
-            DoubleBuffered = true;
-            SetStyle(ControlStyles.ResizeRedraw, true);
-        }
-
-        protected override void OnPaint(PaintEventArgs e)
-        {
-            base.OnPaint(e);
-            if (Image == null) return;
-            float scale = Math.Min((float)ClientSize.Width / Image.Width, (float)ClientSize.Height / Image.Height);
-            float w = Image.Width * scale, h = Image.Height * scale;
-            e.Graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
-            e.Graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
-            e.Graphics.DrawImage(Image, (ClientSize.Width - w) / 2, (ClientSize.Height - h) / 2, w, h);
-        }
-    }
-
-    class InstallerForm : Form
-    {
-        static readonly Color Back = Color.FromArgb(12, 12, 12);
-        static readonly Color Field = Color.FromArgb(28, 28, 28);
-        static readonly Color Text1 = Color.FromArgb(235, 235, 235);
-        static readonly Color Text2 = Color.FromArgb(150, 150, 150);
-        static readonly Color Good = Color.FromArgb(90, 220, 90);
-        static readonly Color Warn = Color.FromArgb(255, 190, 70);
-        static readonly Color Bad = Color.FromArgb(255, 95, 95);
-        static readonly Color Red = Color.FromArgb(180, 22, 22);
-
-        TextBox pathBox;
-        Button installButton, uninstallButton;
-        FlowLayoutPanel statusPanel;
-        string gameDir;
-        List<string> changedScripts; // null: version not checked
-        float k = 1F; // screen dpi / 96
-
-        public InstallerForm()
-        {
-            // Laid out at 96 dpi and scaled here to the screen's dpi (fonts, in points, follow on
-            // their own). WinForms' own AutoScaleMode scales the size of labels twice.
-            using (Graphics g = Graphics.FromHwnd(IntPtr.Zero)) k = g.DpiX / 96F;
-#if SNAPSHOT
-            string fake = Environment.GetEnvironmentVariable("SNAPSHOT_SCALE");
-            if (!string.IsNullOrEmpty(fake)) k = float.Parse(fake, System.Globalization.CultureInfo.InvariantCulture);
-#endif
-            SuspendLayout();
-            Text = "MoreRollers " + Mod.Version + " - installer";
-            AutoScaleMode = AutoScaleMode.None;
-            Font = new Font("Segoe UI", 9.75F);
-            BackColor = Back;
-            ForeColor = Text1;
-            FormBorderStyle = FormBorderStyle.FixedSingle;
-            MaximizeBox = false;
-            StartPosition = FormStartPosition.CenterScreen;
-            ClientSize = new Size(S(640), S(520));
-            try { Icon = Icon.ExtractAssociatedIcon(Application.ExecutablePath); } catch (Exception) { }
-
-            ImagePanel banner = new ImagePanel();
-            banner.Bounds = R(10, 8, 620, 186);
-            banner.Image = Image.FromStream(new MemoryStream(Mod.Resource("banner.png")));
-            Controls.Add(banner);
-
-            Label intro = MakeLabel("Adds LOCAL SPLITSCREEN to Buckshot Roulette: 2 to 4 seats on one PC, each local player with their own view, and CPU players for the empty seats (or play alone against them).", 24, 200, 592, 40);
-            intro.ForeColor = Text2;
-
-            MakeLabel("Buckshot Roulette folder", 24, 248, 400, 20);
-            pathBox = new TextBox();
-            pathBox.Bounds = R(24, 270, 488, 26);
-            pathBox.BackColor = Field;
-            pathBox.ForeColor = Text1;
-            pathBox.BorderStyle = BorderStyle.FixedSingle;
-            pathBox.TextChanged += delegate { RefreshState(); };
-            Controls.Add(pathBox);
-            Button browse = MakeButton("Browse...", 520, 269, 96, 28, Field);
-            browse.Click += delegate { Browse(); };
-
-            statusPanel = new FlowLayoutPanel();
-            statusPanel.Bounds = R(24, 306, 592, 100);
-            statusPanel.FlowDirection = FlowDirection.TopDown;
-            statusPanel.WrapContents = false;
-            Controls.Add(statusPanel);
-
-            installButton = MakeButton("Install", 24, 414, 290, 44, Red);
-            installButton.Font = new Font("Segoe UI Semibold", 12F);
-            installButton.Click += delegate { DoInstall(); };
-            uninstallButton = MakeButton("Uninstall", 326, 414, 290, 44, Field);
-            uninstallButton.Font = new Font("Segoe UI", 12F);
-            uninstallButton.Click += delegate { DoUninstall(); };
-
-            LinkLabel github = MakeLink("GitHub page", Mod.RepoUrl, 24, 484);
-            MakeLink("Discord", Mod.DiscordUrl, 0, 484).Left = github.Right + S(16);
-            Label credits = MakeLabel("v" + Mod.Version + "  -  by Mash  -  GPL-3.0", 316, 486, 300, 20);
-            credits.TextAlign = ContentAlignment.MiddleRight;
-            credits.ForeColor = Text2;
-
-            ResumeLayout(false);
-            PerformLayout();
-
-            string found = Mod.FindGame();
-            if (found != null) pathBox.Text = found;
-            else RefreshState();
-            ActiveControl = installButton.Enabled ? (Control)installButton : browse;
-        }
-
-        int S(int v) { return (int)Math.Round(v * k); }
-        Rectangle R(int x, int y, int w, int h) { return new Rectangle(S(x), S(y), S(w), S(h)); }
-
-        Label MakeLabel(string text, int x, int y, int w, int h)
-        {
-            Label l = new Label();
-            l.Text = text;
-            l.Bounds = R(x, y, w, h);
-            Controls.Add(l);
-            return l;
-        }
-
-        Button MakeButton(string text, int x, int y, int w, int h, Color color)
-        {
-            Button b = new Button();
-            b.Text = text;
-            b.Bounds = R(x, y, w, h);
-            b.FlatStyle = FlatStyle.Flat;
-            b.FlatAppearance.BorderColor = Color.FromArgb(90, 90, 90);
-            b.BackColor = color;
-            b.ForeColor = Text1;
-            b.UseVisualStyleBackColor = false;
-            b.Cursor = Cursors.Hand;
-            Controls.Add(b);
-            return b;
-        }
-
-        LinkLabel MakeLink(string text, string url, int x, int y)
-        {
-            LinkLabel l = new LinkLabel();
-            l.Text = text;
-            l.AutoSize = true;
-            l.Location = new Point(S(x), S(y));
-            l.LinkColor = Good;
-            l.ActiveLinkColor = Text1;
-            l.VisitedLinkColor = Good;
-            l.LinkClicked += delegate { Open(url); };
-            Controls.Add(l);
-            return l;
-        }
-
-        void AddStatus(string text, Color color)
-        {
-            Label l = new Label();
-            l.Text = text;
-            l.ForeColor = color;
-            l.AutoSize = true;
-            l.MaximumSize = new Size(statusPanel.ClientSize.Width, 0);
-            l.Margin = new Padding(0, 0, 0, S(4));
-            statusPanel.Controls.Add(l);
-        }
-
-        static void Open(string url)
-        {
-            try { Process.Start(new ProcessStartInfo(url) { UseShellExecute = true }); } catch (Exception) { }
-        }
-
-        void Browse()
-        {
-            using (OpenFileDialog d = new OpenFileDialog())
-            {
-                d.Title = "Select Buckshot Roulette.exe";
-                d.Filter = "Buckshot Roulette|" + Mod.GameExe + "|Programs (*.exe)|*.exe";
-                d.CheckFileExists = true;
-                if (Directory.Exists(pathBox.Text)) d.InitialDirectory = pathBox.Text;
-                if (d.ShowDialog(this) != DialogResult.OK) return;
-                string dir = Mod.ResolveGameDir(d.FileName) ?? Path.GetDirectoryName(d.FileName);
-                pathBox.Text = dir;
-            }
-        }
-
-        /// Reads the folder in the box again and says what the buttons will do.
-        void RefreshState()
-        {
-            statusPanel.SuspendLayout();
-            statusPanel.Controls.Clear();
-            gameDir = Mod.ResolveGameDir(pathBox.Text);
-            changedScripts = null;
-            if (gameDir == null)
-            {
-                if (pathBox.Text.Trim() == "")
-                    AddStatus("Buckshot Roulette wasn't found automatically. Click Browse... and select Buckshot Roulette.exe in the game's folder (in Steam: right-click the game > Manage > Browse local files).", Warn);
-                else
-                    AddStatus("There is no Buckshot Roulette.exe in this folder.", Bad);
-                installButton.Text = "Install";
-                installButton.Enabled = false;
-                uninstallButton.Enabled = false;
-                statusPanel.ResumeLayout();
-                return;
-            }
-
-            try
-            {
-                changedScripts = Mod.ChangedScripts(gameDir);
-                if (changedScripts.Count == 0)
-                    AddStatus("Buckshot Roulette " + Mod.GameVersion + " found: supported.", Good);
-                else
-                    AddStatus("This copy of Buckshot Roulette is not " + Mod.GameVersion + ", the version this mod was made for (the game was probably updated). The mod would stay turned off and the game would run normally. Look for a newer MoreRollers on the GitHub page.", Warn);
-            }
-            catch (Exception)
-            {
-                AddStatus("Buckshot Roulette found, but its version couldn't be checked. The mod checks it again at launch.", Warn);
-            }
-
-            string installed = Mod.InstalledVersion(gameDir);
-            bool registered = Mod.Registered(gameDir);
-            if (installed != null && registered)
-            {
-                AddStatus("MoreRollers " + (installed == "" ? "" : installed + " ") + "is installed. Start the game from Steam: LOCAL SPLITSCREEN is in the main menu, under MULTIPLAYER.", Good);
-                installButton.Text = installed == Mod.Version ? "Reinstall" : "Update to " + Mod.Version;
-            }
-            else if (installed != null || registered)
-            {
-                AddStatus("MoreRollers is only partly installed: install it again to repair it.", Warn);
-                installButton.Text = "Repair";
-            }
-            else
-            {
-                AddStatus("MoreRollers is not installed in this copy yet.", Text2);
-                installButton.Text = "Install";
-            }
-            if (Mod.GameRunning())
-                AddStatus("Buckshot Roulette is running: close it before installing or uninstalling.", Warn);
-            installButton.Enabled = true;
-            uninstallButton.Enabled = Mod.AnythingInstalled(gameDir);
-            statusPanel.ResumeLayout();
-        }
-
-        bool CheckNotRunning()
-        {
-            if (!Mod.GameRunning()) return true;
-            MessageBox.Show(this, "Buckshot Roulette is running. Close the game, then try again.", Text, MessageBoxButtons.OK, MessageBoxIcon.Warning);
-            RefreshState();
-            return false;
-        }
-
-        void DoInstall()
-        {
-            if (gameDir == null || !CheckNotRunning()) return;
-            if (changedScripts != null && changedScripts.Count > 0)
-            {
-                DialogResult answer = MessageBox.Show(this,
-                    "This copy of Buckshot Roulette is not " + Mod.GameVersion + ", the version this mod was made for. " +
-                    "The mod would stay turned off: the game would run normally, without LOCAL SPLITSCREEN.\n\nInstall anyway?",
-                    Text, MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2);
-                if (answer != DialogResult.Yes) return;
-            }
-            Run("install", delegate { Mod.Install(gameDir); },
-                "MoreRollers " + Mod.Version + " is installed.\n\nStart Buckshot Roulette from Steam as usual: LOCAL SPLITSCREEN is in the main menu, right under MULTIPLAYER.");
-        }
-
-        void DoUninstall()
-        {
-            if (gameDir == null || !CheckNotRunning()) return;
-            if (MessageBox.Show(this, "Remove MoreRollers from this copy of Buckshot Roulette?", Text, MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes)
-                return;
-            Run("uninstall", delegate { Mod.Uninstall(gameDir); },
-                "MoreRollers is uninstalled. The game folder is back to how it was.");
-        }
-
-        void Run(string action, MethodInvoker work, string done)
-        {
-            try
-            {
-                Cursor = Cursors.WaitCursor;
-                work();
-                Cursor = Cursors.Default;
-                MessageBox.Show(this, done, Text, MessageBoxButtons.OK, MessageBoxIcon.Information);
-            }
-            catch (Exception e)
-            {
-                Cursor = Cursors.Default;
-                if (Mod.IsAccessDenied(e))
-                {
-                    DialogResult answer = MessageBox.Show(this,
-                        "Windows didn't let the installer write to the game's folder.\n\nTry again as administrator?",
-                        Text, MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
-                    if (answer == DialogResult.Yes) Program.RunElevated(action, gameDir);
-                }
-                else
-                {
-                    MessageBox.Show(this, "The " + action + " failed:\n\n" + e.Message, Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
-            }
-            RefreshState();
-        }
-
-#if SNAPSHOT
-        /// Test build only: renders the window to a PNG instead of showing it.
-        public void Snapshot(string png)
-        {
-            string dir = Environment.GetEnvironmentVariable("SNAPSHOT_DIR");
-            if (dir != null) pathBox.Text = dir;
-            StartPosition = FormStartPosition.Manual;
-            Location = new Point(-4000, -4000);
-            ShowInTaskbar = false;
-            Show();
-            Application.DoEvents();
-            using (Bitmap b = new Bitmap(Width, Height))
-            {
-                DrawToBitmap(b, new Rectangle(0, 0, Width, Height));
-                b.Save(png, System.Drawing.Imaging.ImageFormat.Png);
-            }
-            Close();
-        }
-#endif
-    }
-
     static class Program
     {
+        /// Buckshot Roulette on Steam, for the PLAY button.
+        public const int SteamAppId = 2835570;
+
         [STAThread]
         static int Main(string[] args)
         {
@@ -683,13 +368,13 @@ namespace MoreRollers
                 else if (a == "--uninstall") action = "uninstall";
                 else if (a == "--quiet") quiet = true;
 #if SNAPSHOT
-                else if (a.StartsWith("--snapshot=")) { new InstallerForm().Snapshot(a.Substring(11)); return 0; }
+                else if (a.StartsWith("--snapshot=")) { TerminalWindow.Snapshot(a.Substring(11)); return 0; }
 #endif
                 else dir = a;
             }
             if (action == null)
             {
-                Application.Run(new InstallerForm());
+                Application.Run(new TerminalWindow());
                 return 0;
             }
             return RunCommand(action, dir, quiet);
@@ -698,7 +383,7 @@ namespace MoreRollers
         /// --install / --uninstall without the window (also used to retry as administrator).
         static int RunCommand(string action, string given, bool quiet)
         {
-            string title = "MoreRollers " + Mod.Version + " - installer";
+            string title = "MoreRollers " + Mod.Version + " installer";
             string dir = given != null ? Mod.ResolveGameDir(given) : Mod.FindGame();
             if (dir == null)
             {
@@ -724,17 +409,23 @@ namespace MoreRollers
         }
 
         /// Runs the same action again with administrator rights (Windows asks the user first).
-        public static void RunElevated(string action, string dir)
+        /// Returns its exit code, or -1 if the user said no.
+        public static int RunElevated(string action, string dir)
         {
-            ProcessStartInfo psi = new ProcessStartInfo(Application.ExecutablePath, "--" + action + " \"" + dir + "\"");
+            ProcessStartInfo psi = new ProcessStartInfo(Application.ExecutablePath, "--" + action + " \"" + dir + "\" --quiet");
             psi.UseShellExecute = true;
             psi.Verb = "runas";
             try
             {
                 Process p = Process.Start(psi);
-                if (p != null) p.WaitForExit();
+                if (p == null) return 1;
+                p.WaitForExit();
+                return p.ExitCode;
             }
-            catch (System.ComponentModel.Win32Exception) { } // the user said no
+            catch (System.ComponentModel.Win32Exception)
+            {
+                return -1;
+            }
         }
     }
 }
