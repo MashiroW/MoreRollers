@@ -1,5 +1,5 @@
-﻿# Désinstalle le mod Local Splitscreen de Buckshot Roulette.
-#   Uninstall.bat                       -> trouve le jeu via Steam
+﻿# Uninstalls MoreRollers, the local splitscreen mod for Buckshot Roulette.
+#   Uninstall.bat                       -> finds the game through Steam
 #   Uninstall.bat "D:\...\Buckshot Roulette_windows"
 param([string]$GameDir = "")
 
@@ -8,7 +8,7 @@ $ErrorActionPreference = "Stop"
 
 try {
     $GameDir = Resolve-GameDir $GameDir
-    Write-Host "Jeu trouvé : $GameDir"
+    Write-Host "Game found: $GameDir"
 
     # 1. Remove the mod's autoload; delete override.cfg if nothing else is left in it
     $cfg = Join-Path $GameDir "override.cfg"
@@ -38,13 +38,13 @@ try {
     if (Test-Path -LiteralPath $target) { Remove-Item -LiteralPath $target -Recurse -Force }
 
     Write-Host ""
-    Write-Host "Mod désinstallé, le jeu est revenu à l'état d'origine." -ForegroundColor Green
+    Write-Host "Mod uninstalled, the game is back to how it was." -ForegroundColor Green
     exit 0
 } catch {
     Write-Host ""
-    Write-Host "Echec de la désinstallation : $($_.Exception.Message)" -ForegroundColor Red
+    Write-Host "The uninstallation failed: $($_.Exception.Message)" -ForegroundColor Red
     if ($_.Exception -is [System.UnauthorizedAccessException]) {
-        Write-Host "Essayez : clic droit sur Uninstall.bat > Exécuter en tant qu'administrateur."
+        Write-Host "Try this: right-click Uninstall.bat > Run as administrator."
     }
     exit 1
 }

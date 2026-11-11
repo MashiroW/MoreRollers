@@ -11,6 +11,7 @@ extends Node
 ## mouse cursor, audio buses, scene changes) and get the answer for their own player.
 
 const MOD_VERSION := "1.1.0"
+const DISCORD_LINK := "https://discord.gg/R4tCHhVJD4"
 const GAME_VERSION := "__GAME_VERSION__"
 const PACK_FILE := "splitscreen.pck"
 const LOBBY_SCENE := "res://mods/splitscreen/split_lobby.tscn"

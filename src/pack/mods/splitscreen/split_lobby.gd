@@ -10,9 +10,16 @@ const SND_PRESS := "res://audio/button press3.ogg"
 const SND_LEAVE := "res://audio/show cursor.ogg"
 const SND_START := "res://audio/button_start main.ogg"
 const MUSIC := "res://multiplayer/audio/music/mp_music desolate loop3.ogg"
+const TEX_DISCORD := "res://multiplayer/misc/mp_discord icon1.png"
 const STICK_THRESHOLD := 0.6
+## The online lobby draws its "find players" Discord link at this scale (the scale of the Control
+## holding its menu), which squeezes the receipt font. The link here reuses it, with the same sizes.
+const DISCORD_SCALE := Vector2(0.299635, 0.438273)
+const DISCORD_ICON_SCALE := Vector2(0.14409, 0.0996983)
 
-enum Row { CUSTOMIZE, BOTS, START, BACK }
+## DISCORD is not one of the centered rows: it is the green link in the corner, reached by moving
+## down from BACK like the rows.
+enum Row { CUSTOMIZE, BOTS, START, BACK, DISCORD }
 
 var font : Font
 var slots : Array = []
@@ -20,6 +27,8 @@ var rows : Array = []
 var selected := Row.START
 var message_label : Label
 var summary_label : Label
+var discord : Control
+var discord_rect : Rect2
 var fader : ColorRect
 var leaving := false
 var stick_latch := {}
@@ -123,9 +132,10 @@ func _build() -> void:
 	summary_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	summary_label.size.y = 40
 	summary_label.modulate.a = 0.6
-	message_label = _label("", 16, Vector2(0, 458), 960)
+	message_label = _label("", 16, Vector2(0, 452), 960)
 	message_label.modulate = Color(1, 0.45, 0.45, 0)
-	var hint := _label("JOIN: ENTER / CLICK / (A)     LEAVE: BACKSPACE / (B)     SELECT: ARROWS / D-PAD     CPU PLAYERS: LEFT / RIGHT", 12, Vector2(0, 498), 960)
+	_build_discord()
+	var hint := _label("JOIN: ENTER / CLICK / (A)     LEAVE: BACKSPACE / (B)     SELECT: ARROWS / D-PAD     CPU PLAYERS: LEFT / RIGHT", 12, Vector2(0, 508), 960)
 	hint.modulate.a = 0.5
 
 	fader = ColorRect.new()
@@ -141,6 +151,38 @@ func _build() -> void:
 	speaker_start.pitch_scale = 0.3
 	speaker_music = _speaker(MUSIC, -4.0, &"music_secondary")
 	speaker_music.finished.connect(speaker_music.play)
+
+## The mod's Discord link, built like the online lobby's "find players" one: green text with a green
+## outline, the game's Discord icon on its right, half transparent while hovered or selected.
+func _build_discord() -> void:
+	discord = Control.new()
+	discord.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	discord.scale = DISCORD_SCALE
+	add_child(discord)
+	var l := Label.new()
+	l.text = "MOREROLLERS DISCORD"
+	l.auto_translate = false
+	l.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	l.add_theme_font_override("font", font)
+	l.add_theme_font_size_override("font_size", 39)
+	l.add_theme_color_override("font_color", Color(0, 1, 0))
+	l.add_theme_color_override("font_outline_color", Color(0, 1, 0))
+	l.add_theme_constant_override("outline_size", 2)
+	l.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	discord.add_child(l)
+	l.size = Vector2(l.get_minimum_size().x, 58)
+	var icon := TextureRect.new()
+	icon.texture = load(TEX_DISCORD)
+	icon.self_modulate = Color(0, 1, 0)
+	icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	icon.size = Vector2(520, 520)
+	icon.scale = DISCORD_ICON_SCALE
+	icon.position = Vector2(l.size.x + 17.5, 2.083)
+	discord.add_child(icon)
+	var screen_size := Vector2(icon.position.x + icon.size.x * DISCORD_ICON_SCALE.x, l.size.y) * DISCORD_SCALE
+	discord.position = Vector2(922 - screen_size.x, 474)
+	discord_rect = Rect2(discord.position, screen_size)
 
 func _panel_style(joined: bool) -> StyleBoxFlat:
 	var s := StyleBoxFlat.new()
@@ -192,6 +234,7 @@ func _refresh() -> void:
 		rows[Row.START].modulate.a *= 0.5
 	if SplitMod.players.size() >= SplitMod.MAX_PLAYERS:
 		rows[Row.BOTS].modulate.a *= 0.5
+	discord.modulate.a = 0.5 if selected == Row.DISCORD else 1.0
 	summary_label.text = "     ".join(SplitMod.match_summary())
 
 func _show_message(text: String) -> void:
@@ -240,6 +283,10 @@ func _on_key(event: InputEventKey) -> void:
 		KEY_RIGHT: _change_bots(1)
 
 func _on_click(pos: Vector2) -> void:
+	if discord_rect.has_point(pos):
+		_select(Row.DISCORD)
+		_activate()
+		return
 	if !SplitMod.is_joined(SplitMod.DEVICE_KBM):
 		_join(SplitMod.DEVICE_KBM)
 		return
@@ -283,6 +330,8 @@ func _row_at(pos: Vector2) -> int:
 		var l : Label = rows[r]
 		if Rect2(l.position + Vector2(300, 0), Vector2(360, l.size.y)).has_point(pos):
 			return r
+	if discord_rect.has_point(pos):
+		return Row.DISCORD
 	return -1
 
 
@@ -295,7 +344,7 @@ func _select(r: int) -> void:
 	_refresh()
 
 func _move(dir: int) -> void:
-	_select(wrapi(selected + dir, 0, rows.size()))
+	_select(wrapi(selected + dir, 0, Row.size()))
 
 func _activate() -> void:
 	match selected:
@@ -303,6 +352,9 @@ func _activate() -> void:
 		Row.BOTS: _change_bots(1, true)
 		Row.START: _try_start()
 		Row.BACK: _back_to_menu()
+		Row.DISCORD:
+			speaker_press.play()
+			OS.shell_open(SplitMod.DISCORD_LINK)
 
 func _join(device: int) -> void:
 	if SplitMod.join(device):

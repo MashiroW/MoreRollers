@@ -39,7 +39,7 @@ function Resolve-GameDir([string]$Given) {
         $Given = $Given.Trim('"').TrimEnd("\")
         if (Test-GameDir $Given) { return $Given }
         if (Test-GameDir (Join-Path $Given "Buckshot Roulette_windows")) { return (Join-Path $Given "Buckshot Roulette_windows") }
-        throw "Impossible de trouver '$GameExeName' dans : $Given"
+        throw "Can't find '$GameExeName' in: $Given"
     }
     foreach ($lib in Get-SteamLibraries) {
         foreach ($sub in @("steamapps\common\Buckshot Roulette\Buckshot Roulette_windows", "steamapps\common\Buckshot Roulette")) {
@@ -47,8 +47,8 @@ function Resolve-GameDir([string]$Given) {
             if (Test-GameDir $dir) { return $dir }
         }
     }
-    Write-Host "Je n'ai pas trouve le jeu automatiquement."
-    $answer = Read-Host "Collez le chemin du dossier qui contient '$GameExeName'"
+    Write-Host "The game wasn't found automatically."
+    $answer = Read-Host "Paste the path of the folder that holds '$GameExeName'"
     return (Resolve-GameDir $answer)
 }
 

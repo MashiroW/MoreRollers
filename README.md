@@ -2,7 +2,7 @@
 
 # MoreRollers - Local Splitscreen for Buckshot Roulette
 
-[![Version](https://img.shields.io/badge/version-1.1-2ea44f?style=for-the-badge)](https://github.com/MashiroW/MoreRollers) [![Windows](https://img.shields.io/badge/Windows-0078D6?style=for-the-badge&logo=data:image/svg%2bxml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0id2hpdGUiIGQ9Ik0wIDBoMTF2MTFIMHpNMTMgMGgxMXYxMUgxM3pNMCAxM2gxMXYxMUgwek0xMyAxM2gxMXYxMUgxM3oiLz48L3N2Zz4=&logoColor=white)](#) [![Stars](https://img.shields.io/github/stars/MashiroW/MoreRollers?style=for-the-badge&logo=github&color=e3b341)](https://github.com/MashiroW/MoreRollers/stargazers) [![Sponsor](https://img.shields.io/badge/Sponsor-%E2%9D%A4-EA4AAA?style=for-the-badge&logo=githubsponsors&logoColor=white)](https://github.com/sponsors/MashiroW)
+[![Version](https://img.shields.io/badge/version-1.1-2ea44f?style=for-the-badge)](https://github.com/MashiroW/MoreRollers) [![Windows](https://img.shields.io/badge/Windows-0078D6?style=for-the-badge&logo=data:image/svg%2bxml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0id2hpdGUiIGQ9Ik0wIDBoMTF2MTFIMHpNMTMgMGgxMXYxMUgxM3pNMCAxM2gxMXYxMUgwek0xMyAxM2gxMXYxMUgxM3oiLz48L3N2Zz4=&logoColor=white)](#) [![Stars](https://img.shields.io/github/stars/MashiroW/MoreRollers?style=for-the-badge&logo=github&color=e3b341)](https://github.com/MashiroW/MoreRollers/stargazers) [![Sponsor](https://img.shields.io/badge/Sponsor-%E2%9D%A4-EA4AAA?style=for-the-badge&logo=githubsponsors&logoColor=white)](https://github.com/sponsors/MashiroW) [![Discord](https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/R4tCHhVJD4) [![License](https://img.shields.io/badge/license-GPL--3.0-blue?style=for-the-badge)](LICENSE)
 
 *A mod that adds **local splitscreen multiplayer** to **Buckshot Roulette**: up to 4 players on a single PC, each with their own view, playing the game's real multiplayer match, with CPU players to fill the empty seats.*
 
@@ -21,34 +21,62 @@ Seats nobody takes can go to **CPU players** that play like the Dealer from the 
 | | |
 |---|---|
 | Game version | v2.2.0.6 (Steam, Windows) |
-| Players | 2 to 4 seats: up to 4 local players (one on keyboard & mouse, the others on controllers), CPU players in the free seats |
+| Players | 2 to 4 at the table: 1 to 4 people on one PC, plus CPU players in the empty seats |
 | Game files modified | none |
+
+---
+
+## 👥 Who can play?
+
+A match needs **at least 2 seats taken, and at most 4**. A seat is taken either by **a person** sitting at your PC or by **a CPU player** (a bot that plays like the Dealer). So even alone, you can play:
+
+| People at the PC | What you can play |
+|---|---|
+| 1 | You against 1, 2 or 3 CPU players |
+| 2 | 1 vs 1, or add 1 or 2 CPU players |
+| 3 | 3 players, or add 1 CPU player |
+| 4 | A full table of 4 players |
+
+What each person needs:
+- **one person** plays with the **keyboard & mouse**;
+- **every other person** needs **their own controller** plugged into the PC;
+- CPU players need nothing.
+
+Everyone looks at the same screen: it is split into one view per person.
 
 ---
 
 ## 📥 Installation
 
-1. Close the game.
-2. Double-click **`Install.bat`**.
-   The game is found automatically through your Steam libraries. If it isn't, the installer asks for its folder, which you can also pass directly:
-   ```
-   Install.bat "D:\SteamLibrary\steamapps\common\Buckshot Roulette\Buckshot Roulette_windows"
-   ```
-3. Start the game from Steam as usual. **LOCAL SPLITSCREEN** is now in the main menu.
+### The easy way: the installer
 
-What the installer does:
-- copies `mod\loader.gd` and `mod\splitscreen.pck` to `<game folder>\splitscreen_mod\`;
-- adds a `SplitMod=...` line to `<game folder>\override.cfg`. The file is created if it doesn't exist. If it already holds other settings, they are kept and the original is backed up as `override.cfg.before-splitscreen`.
+1. Download **`MoreRollers-Installer.exe`** from the [latest release](https://github.com/MashiroW/MoreRollers/releases/latest).
+2. Close the game, then double-click the installer.
+   Windows may show "Windows protected your PC", because the installer isn't signed: click **More info**, then **Run anyway**. Its source code is in this repository (`installer\MoreRollersInstaller.cs`).
+3. The installer finds the game through Steam and checks that its version is supported. Click **Install**.
+   If the game isn't found, click **Browse...** and select `Buckshot Roulette.exe`. To find it in Steam: right-click Buckshot Roulette > **Manage** > **Browse local files**.
+4. Start the game from Steam as usual. **LOCAL SPLITSCREEN** is now in the main menu, right under MULTIPLAYER.
 
+To **update** the mod, run the newer installer and click **Update**. To **uninstall** it, run the installer again and click **Uninstall**.
+
+### Without the installer
+
+Download the source code (green **Code** button > **Download ZIP**, or the zip of a release), unzip it, close the game, then double-click **`Install.bat`**.
+The game is found automatically through your Steam libraries. If it isn't, the script asks for its folder, which you can also pass directly:
+```
+Install.bat "D:\SteamLibrary\steamapps\common\Buckshot Roulette\Buckshot Roulette_windows"
+```
 If Windows refuses to write to the game folder, right-click `Install.bat` and choose "Run as administrator".
 
-### Uninstall
+To uninstall, double-click **`Uninstall.bat`** (same optional argument).
 
-Double-click **`Uninstall.bat`** (same optional argument as the installer). It:
-- removes the mod's line from `override.cfg`, and deletes the file if the mod was the only thing in it;
-- deletes `splitscreen_mod\` and the `override.cfg.before-splitscreen` backup.
+### What installing changes
 
-The game folder goes back to exactly how it was.
+Both ways do exactly the same thing:
+- they copy `loader.gd` and `splitscreen.pck` to `<game folder>\splitscreen_mod\`;
+- they add a `SplitMod=...` line to `<game folder>\override.cfg`. The file is created if it doesn't exist. If it already holds other settings, they are kept and the original is backed up as `override.cfg.before-splitscreen`.
+
+Uninstalling removes the mod's line from `override.cfg` (and the file itself if the mod was the only thing in it), then deletes `splitscreen_mod\` and the backup. The game folder goes back to exactly how it was. No game file is ever modified.
 
 ---
 
@@ -57,9 +85,12 @@ The game folder goes back to exactly how it was.
 ### Starting a match
 
 1. In the main menu, pick **LOCAL SPLITSCREEN**.
-2. Each player joins with their own device. The first one to join is player 1, the host of the match.
-3. Optionally, add CPU players on the **CPU PLAYERS** row (left / right), and set up the match with **CUSTOMIZE MATCH SETTINGS**.
-4. Pick **START**. At least 2 seats must be taken, by local players or CPU players, and at least one local player must have joined.
+2. Each person joins with their own device: **Enter**, **Space** or a **left click** on the keyboard & mouse, **A** on a controller. The first one to join is player 1, the host of the match.
+3. Want CPU players? Go to the **CPU PLAYERS** row and press **left / right** to choose how many (0 to 3, as many as there are empty seats).
+4. Optionally, set up the match with **CUSTOMIZE MATCH SETTINGS**.
+5. Pick **START**.
+
+Playing alone: join, set **CPU PLAYERS** to 1, 2 or 3, then pick **START**.
 
 ### Lobby controls
 
@@ -72,6 +103,7 @@ The game folder goes back to exactly how it was.
 | Confirm | Enter or click | A |
 | Start the match | START row | START row or Start button |
 | Back to the main menu | Escape or BACK row | BACK row |
+| Open the MoreRollers Discord | Click **MOREROLLERS DISCORD**, bottom right | Move down past BACK, then A |
 
 There is only one keyboard & mouse player; every other player uses a controller. If a controller is unplugged in the lobby, its player is removed.
 
@@ -213,6 +245,7 @@ Each `SubViewport` keeps its own UI focus, so controllers navigate the game's pr
 
 - `MenuManager.gd` adds the LOCAL SPLITSCREEN entry by duplicating the MULTIPLAYER button, so it has the same font, sounds, hover and controller navigation; the buttons below are shifted down one row.
 - The splitscreen lobby is built in code with the game's fonts, sounds and music, and handles joining per device.
+- Its **MOREROLLERS DISCORD** link copies the online lobby's "find players to play with" link: same font squeezed by the same scale, same green text and outline, the game's own Discord icon, half transparent while hovered.
 - **CUSTOMIZE MATCH SETTINGS** opens the real multiplayer lobby scene (`mp_lobby`) with `SplitMod.customizing` set. `MP_LobbyUI.gd` then goes straight to the customization screen, without a Steam lobby. Leaving that screen (`ExitMatchCustomization`) returns to the splitscreen lobby instead of the online lobby's home. The rest is original code: the screen saves its settings to `GlobalVariables.stashed_match_customization_dictionary`, as it does for the host of an online match.
 - When a match starts, those settings become the active match dictionary. The number of rounds and the intro are applied the way the online lobby does it.
 - At the end of the match, the session restores everything it changed: Steam IDs and members, active customization, volumes and audio filter, display mode, cursor. Then it goes back to the lobby.
@@ -234,7 +267,7 @@ Closing the window during a match goes through the same path (`auto_accept_quit`
 
 ## 🔄 After a game update
 
-If an update changes one of the replaced scripts, the mod turns itself off at launch. The game stays playable, just without the LOCAL SPLITSCREEN entry. To bring it back, rebuild the mod (see [Development](#%EF%B8%8F-development)) and run `Install.bat` again.
+If an update changes one of the replaced scripts, the mod turns itself off at launch. The game stays playable, just without the LOCAL SPLITSCREEN entry. The installer warns about it before installing. To bring the mod back, install a MoreRollers release made for the new version, or rebuild the mod yourself (see [Development](#%EF%B8%8F-development)).
 
 ## ✅ Project status
 
@@ -248,7 +281,8 @@ Checked in an isolated copy of the game, with 2 players (mouse for player 1, sim
 - "Disconnect" from the pause menu through the real buttons, for player 1 (mouse) and player 2 (controller), including during the results screen;
 - closing the window mid-match;
 - the online multiplayer lobby, which behaves like the original game (home, customization, cancel);
-- installing and uninstalling, with and without an existing `override.cfg`.
+- installing and uninstalling, with and without an existing `override.cfg`;
+- the installer exe: finding the game through Steam, the game version check, install, update, repair and uninstall, with the same result as `Install.bat` / `Uninstall.bat`, and its window at 100 % and 150 % display scaling.
 
 A full 2-player match (mouse + real controller) was also played on the installed version.
 
@@ -281,12 +315,22 @@ Without an argument, the game is looked up at its default Steam location. The sc
 
 No extracted game file is stored in the repository: `build\` is ignored by Git.
 
+### Building the installer
+
+```
+node tools/build_installer.js
+```
+
+Compiles `installer\MoreRollersInstaller.cs` into `dist\MoreRollers-Installer.exe` with the C# compiler that comes with Windows (.NET Framework 4), so nothing else needs to be installed. The built mod (`mod\`) and the banner are embedded in the exe, so build the mod first. The exe also works from the command line: `--install` or `--uninstall`, optionally followed by the game folder, and `--quiet` to show no message (exit code 0: done, 1: failed, 2: game not found).
+
 ### Repository layout
 
 | Path | Role |
 |---|---|
-| `Install.bat`, `Uninstall.bat` | Launchers for the installer and the uninstaller |
-| `installer\` | PowerShell scripts: finding the game, copying files, editing `override.cfg` |
+| `Install.bat`, `Uninstall.bat` | Launchers for the PowerShell installer and uninstaller |
+| `installer\*.ps1` | PowerShell scripts: finding the game, copying files, editing `override.cfg` |
+| `installer\MoreRollersInstaller.cs` | The installer exe: same steps as the scripts, plus the game version check, in a window |
+| `installer\app.manifest`, `installer\MoreRollers.ico` | The installer's manifest (runs as the user, sharp on high-dpi screens) and icon |
 | `mod\` | The built mod, i.e. what gets installed into the game |
 | `src\loader.gd` | `SplitMod` autoload: version check, pack loading, per-player context, packet bus |
 | `src\menu_additions.gd` | LOCAL SPLITSCREEN entry, appended to `MenuManager.gd` |
@@ -295,11 +339,13 @@ No extracted game file is stored in the repository: `build\` is ignored by Git.
 | `src\pack\mods\splitscreen\split_session.*` | Match: views, loading the match copies, input routing, staged shutdown |
 | `src\pack\mods\splitscreen\split_bot.gd` | CPU player: what it knows of the shells, its decisions, and the calls that play them |
 | `tools\build.js` | Patching the game's scripts and building the mod |
+| `tools\build_installer.js` | Building the installer exe |
 | `tools\pck.js`, `tools\mkpck.js` | Reading and writing Godot 4.1 packs (PCK format v2) |
 | `tools\mp_main_scripts.txt` | List of the scripts used by the multiplayer scene |
 | `tools\deps.js`, `tools\nodes.js` | Analysis of the game's scenes once converted to text |
 | `tools\godot\` | Scripts run by the game's engine: scene conversion, compile check, automated test |
-| `res\` | README banner |
+| `res\` | README banner (also shown in the installer) |
+| `LICENSE` | GNU General Public License v3.0 |
 
 ### Testing without touching the installed game
 
@@ -333,8 +379,12 @@ Useful runs from Git Bash (log in `%APPDATA%\BuckshotSplitTest\logs\godot.log`):
 
 ---
 
-## ⚖️ Notice
+## ⚖️ License and notice
+
+MoreRollers is free software, released under the **GNU General Public License v3.0** (see [LICENSE](LICENSE)): you can use, study, share and modify it, as long as what you share stays under the same license, with its source code.
+
+Questions, bugs, people to play with: join the [MoreRollers Discord](https://discord.gg/R4tCHhVJD4).
 
 MoreRollers is a fan-made mod, not affiliated with the developer or the publisher of Buckshot Roulette. You need your own copy of the game on Steam.
 
-`mod\splitscreen.pck` contains modified copies of some of the game's scripts, which remain the property of their authors.
+`mod\splitscreen.pck` (also embedded in the installer) contains modified copies of some of the game's scripts, which remain the property of their authors and are not covered by the license above.

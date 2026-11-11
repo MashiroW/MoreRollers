@@ -1,5 +1,5 @@
-﻿# Installe le mod Local Splitscreen de Buckshot Roulette.
-#   Install.bat                         -> trouve le jeu via Steam
+﻿# Installs MoreRollers, the local splitscreen mod for Buckshot Roulette.
+#   Install.bat                         -> finds the game through Steam
 #   Install.bat "D:\...\Buckshot Roulette_windows"
 param([string]$GameDir = "")
 
@@ -9,12 +9,12 @@ $ErrorActionPreference = "Stop"
 try {
     $source = Join-Path (Split-Path -Parent $PSScriptRoot) "mod"
     foreach ($f in @("loader.gd", "splitscreen.pck")) {
-        if (-not (Test-Path -LiteralPath (Join-Path $source $f))) { throw "Fichier du mod manquant : mod\$f" }
+        if (-not (Test-Path -LiteralPath (Join-Path $source $f))) { throw "Missing mod file: mod\$f" }
     }
 
     $GameDir = Resolve-GameDir $GameDir
-    Write-Host "Jeu trouvé : $GameDir"
-    if (Test-GameRunning) { Write-Host "Le jeu est ouvert : le mod sera actif au prochain lancement." -ForegroundColor Yellow }
+    Write-Host "Game found: $GameDir"
+    if (Test-GameRunning) { Write-Host "The game is running: the mod will be active the next time it starts." -ForegroundColor Yellow }
 
     # 1. Mod files
     $target = Join-Path $GameDir $ModFolderName
@@ -46,14 +46,14 @@ try {
     Write-CfgLines $cfg $lines
 
     Write-Host ""
-    Write-Host "Mod installé." -ForegroundColor Green
-    Write-Host "Lancez le jeu : 'LOCAL SPLITSCREEN' apparaît dans le menu principal, sous MULTIPLAYER."
+    Write-Host "Mod installed." -ForegroundColor Green
+    Write-Host "Start the game: 'LOCAL SPLITSCREEN' is in the main menu, under MULTIPLAYER."
     exit 0
 } catch {
     Write-Host ""
-    Write-Host "Echec de l'installation : $($_.Exception.Message)" -ForegroundColor Red
+    Write-Host "The installation failed: $($_.Exception.Message)" -ForegroundColor Red
     if ($_.Exception -is [System.UnauthorizedAccessException]) {
-        Write-Host "Essayez : clic droit sur Install.bat > Exécuter en tant qu'administrateur."
+        Write-Host "Try this: right-click Install.bat > Run as administrator."
     }
     exit 1
 }
