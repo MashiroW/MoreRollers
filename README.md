@@ -4,7 +4,7 @@
 
 [![Version](https://img.shields.io/badge/version-1.1-2ea44f?style=for-the-badge)](https://github.com/MashiroW/MoreRollers) [![Windows](https://img.shields.io/badge/Windows-0078D6?style=for-the-badge&logo=data:image/svg%2bxml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0id2hpdGUiIGQ9Ik0wIDBoMTF2MTFIMHpNMTMgMGgxMXYxMUgxM3pNMCAxM2gxMXYxMUgwek0xMyAxM2gxMXYxMUgxM3oiLz48L3N2Zz4=&logoColor=white)](#) [![Stars](https://img.shields.io/github/stars/MashiroW/MoreRollers?style=for-the-badge&logo=github&color=e3b341)](https://github.com/MashiroW/MoreRollers/stargazers) [![Sponsor](https://img.shields.io/badge/Sponsor-%E2%9D%A4-EA4AAA?style=for-the-badge&logo=githubsponsors&logoColor=white)](https://github.com/sponsors/MashiroW) [![Discord](https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/R4tCHhVJD4) [![License](https://img.shields.io/badge/license-GPL--3.0-blue?style=for-the-badge)](LICENSE)
 
-*A mod that adds **local splitscreen multiplayer** to **Buckshot Roulette**: up to 4 players on a single PC, each with their own view, playing the game's real multiplayer match, with CPU players to fill the empty seats.*
+*A mod that adds **local splitscreen multiplayer** to **Buckshot Roulette**: up to 4 players on a single PC, each with their own view, playing the game's real multiplayer match, with the Dealer's AI enhanced for multiplayer to fill the empty seats.*
 
 <img width="1920" height="1080" alt="Screenshot Buckshot MoreRollers" src="https://github.com/user-attachments/assets/3e78d16b-9745-4dad-8d43-f438187bad4b" />
 
@@ -16,7 +16,7 @@ MoreRollers adds a **LOCAL SPLITSCREEN** entry to the main menu, right under MUL
 
 The mod does not rewrite the game. It runs the **official multiplayer mode**, one copy per player, linked together as if they were playing online. You get exactly the same table, items, rules and results screen as an online match, plus the original match customization menu.
 
-Seats nobody takes can go to **CPU players** that play like the Dealer from the single-player game, adapted to a table of up to four. You can also play alone against one to three of them.
+**An enhanced Dealer AI for multiplayer.** In the single-player game, the Dealer only ever faces one player. MoreRollers reworks its AI for the multiplayer mode, so it holds its own at a table of 2 to 4, against people and against other CPU players: it picks its target among everyone at the table, plays every multiplayer item (jammer, adrenaline, inverter, remote), and counts the shells instead of flipping coins. CPU players take the seats nobody takes, and you can also play alone against one to three of them. More in [CPU players](#cpu-players).
 
 | | |
 |---|---|
@@ -28,7 +28,7 @@ Seats nobody takes can go to **CPU players** that play like the Dealer from the 
 
 ## 👥 Who can play?
 
-A match needs **at least 2 seats taken, and at most 4**. A seat is taken either by **a person** sitting at your PC or by **a CPU player** (a bot that plays like the Dealer). So even alone, you can play:
+A match needs **at least 2 seats taken, and at most 4**. A seat is taken either by **a person** sitting at your PC or by **a CPU player** (the Dealer's AI, enhanced to play with up to 4 at the table). So even alone, you can play:
 
 | People at the PC | What you can play |
 |---|---|
@@ -127,7 +127,7 @@ The lobby then shows a summary of the settings, with the same wording as the onl
 
 ### CPU players
 
-They are named DEALER (DEALER 1, 2, 3 when there are several) and play the Dealer's game from the single-player mode, reworked for multiplayer:
+The Dealer's AI from the single-player mode was only made to face one player. MoreRollers enhances it for the multiplayer mode, so it works at a table of 2 to 4, against people and other CPU players alike. CPU players are named DEALER (DEALER 1, 2, 3 when there are several) and play like this:
 - **Same priorities as the Dealer**: magnifying glass when the shell is unknown, cigarettes when hurt, beer to get rid of a doubtful shell, handsaw on a live shell, inverter on a blank, burner phone while there are shells to learn about, adrenaline to steal what it needs. The jammer takes the place of the handcuffs.
 - **Built for a table of four**: it picks its target among all the players (one it can finish off first, otherwise the most dangerous one, by health and items), jams the most dangerous opponent, and uses the remote when the player about to get the shotgun is more dangerous than the one on the other side. Single-player-only behaviour (handcuffs, the defibrillator wires, endless mode) is gone.
 - **Smarter**: instead of the Dealer's coin flips it counts the shells shown at loading and every shell that comes out, and decides on the odds. A likely blank is shot at itself to keep the turn (unless it is on its last life), a likely live at an opponent. It never wastes a handsaw on a target with 1 health, and never shoots itself on a known live.
