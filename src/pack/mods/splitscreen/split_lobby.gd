@@ -1,6 +1,7 @@
 extends Control
 ## Splitscreen lobby: local players join with their device, the match is customized on the game's own
-## customization screen, and the match starts. Works with keyboard & mouse and any number of controllers (2-4 players).
+## customization screen, and the match starts. Works with keyboard & mouse and any number of controllers; CPU players
+## can take the seats left free (1 to 4 local players, 2 to 4 seats in all).
 
 const FONT_MAIN := "res://fonts/fake receipt.otf"
 const TEX_VIGNETTE := "res://misc/menu vignette1.png"
@@ -11,7 +12,7 @@ const SND_START := "res://audio/button_start main.ogg"
 const MUSIC := "res://multiplayer/audio/music/mp_music desolate loop3.ogg"
 const STICK_THRESHOLD := 0.6
 
-enum Row { CUSTOMIZE, START, BACK }
+enum Row { CUSTOMIZE, BOTS, START, BACK }
 
 var font : Font
 var slots : Array = []
@@ -96,7 +97,7 @@ func _build() -> void:
 	add_child(vignette)
 
 	_label("LOCAL SPLITSCREEN", 40, Vector2(0, 34), 960)
-	var sub := _label("MULTIPLAYER  -  2 TO 4 PLAYERS ON ONE SCREEN", 15, Vector2(0, 80), 960)
+	var sub := _label("MULTIPLAYER  -  UP TO 4 PLAYERS ON ONE SCREEN, CPU PLAYERS IN THE FREE SEATS", 15, Vector2(0, 80), 960)
 	sub.modulate.a = 0.55
 
 	for i in SplitMod.MAX_PLAYERS:
@@ -112,19 +113,19 @@ func _build() -> void:
 		status.size.y = 44
 		slots.append({"panel": panel, "title": title, "device": device, "status": status})
 
-	var y := 300.0
-	for r in [Row.CUSTOMIZE, Row.START, Row.BACK]:
+	var y := 290.0
+	for r in [Row.CUSTOMIZE, Row.BOTS, Row.START, Row.BACK]:
 		var l := _label("", 22, Vector2(0, y), 960)
 		rows.append(l)
-		y += 34.0
+		y += 32.0
 
-	summary_label = _label("", 13, Vector2(120, 408), 720)
+	summary_label = _label("", 13, Vector2(120, 422), 720)
 	summary_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	summary_label.size.y = 40
 	summary_label.modulate.a = 0.6
 	message_label = _label("", 16, Vector2(0, 458), 960)
 	message_label.modulate = Color(1, 0.45, 0.45, 0)
-	var hint := _label("JOIN: ENTER / LEFT CLICK / (A)        LEAVE: BACKSPACE / (B)        SELECT: ARROWS / D-PAD", 12, Vector2(0, 498), 960)
+	var hint := _label("JOIN: ENTER / CLICK / (A)     LEAVE: BACKSPACE / (B)     SELECT: ARROWS / D-PAD     CPU PLAYERS: LEFT / RIGHT", 12, Vector2(0, 498), 960)
 	hint.modulate.a = 0.5
 
 	fader = ColorRect.new()
@@ -149,12 +150,23 @@ func _panel_style(joined: bool) -> StyleBoxFlat:
 	return s
 
 func _refresh() -> void:
+	var bots := SplitMod.bots_in_match()
 	for i in slots.size():
 		var slot : Dictionary = slots[i]
 		var joined := i < SplitMod.players.size()
-		slot.panel.add_theme_stylebox_override("panel", _panel_style(joined))
-		slot.title.modulate.a = 1.0 if joined else 0.35
-		if joined:
+		var bot := !joined and i < SplitMod.players.size() + bots
+		slot.panel.add_theme_stylebox_override("panel", _panel_style(joined or bot))
+		slot.title.modulate.a = 1.0 if joined or bot else 0.35
+		slot.title.text = SplitMod.bot_name(i - SplitMod.players.size() + 1, bots) if bot else "PLAYER %d" % (i + 1)
+		if bot:
+			slot.device.text = SplitMod.device_label(SplitMod.DEVICE_BOT)
+			slot.device.modulate.a = 1.0
+			slot.status.text = "PLAYS LIKE THE DEALER"
+			# Every seat taken: joining still works, the last CPU player makes room.
+			if i == SplitMod.MAX_PLAYERS - 1:
+				slot.status.text = "JOIN TO TAKE\nTHIS SEAT"
+			slot.status.modulate.a = 0.5
+		elif joined:
 			var device : int = SplitMod.players[i].device
 			slot.device.text = SplitMod.device_label(device)
 			slot.status.text = "HOST" if i == 0 else "READY"
@@ -164,10 +176,11 @@ func _refresh() -> void:
 			slot.status.modulate.a = 0.6
 		else:
 			slot.device.text = ""
-			slot.status.text = "PRESS ENTER / CLICK\nOR (A) TO JOIN" if i == SplitMod.players.size() else ""
+			slot.status.text = "PRESS ENTER / CLICK\nOR (A) TO JOIN" if i == SplitMod.players.size() + bots else ""
 			slot.status.modulate.a = 0.5
 	var texts := {
 		Row.CUSTOMIZE: tr("MP_UI CUSTOMIZE MATCH"),
+		Row.BOTS: "CPU PLAYERS:  %d" % bots,
 		Row.START: "START",
 		Row.BACK: "BACK",
 	}
@@ -175,8 +188,10 @@ func _refresh() -> void:
 		var l : Label = rows[r]
 		l.text = ("<  " + texts[r] + "  >") if r == selected else texts[r]
 		l.modulate.a = 1.0 if r == selected else 0.55
-	if SplitMod.players.size() < SplitMod.MIN_PLAYERS:
+	if !SplitMod.can_start():
 		rows[Row.START].modulate.a *= 0.5
+	if SplitMod.players.size() >= SplitMod.MAX_PLAYERS:
+		rows[Row.BOTS].modulate.a *= 0.5
 	summary_label.text = "     ".join(SplitMod.match_summary())
 
 func _show_message(text: String) -> void:
@@ -221,6 +236,8 @@ func _on_key(event: InputEventKey) -> void:
 			if !event.echo: _back_to_menu()
 		KEY_UP: _move(-1)
 		KEY_DOWN: _move(1)
+		KEY_LEFT: _change_bots(-1)
+		KEY_RIGHT: _change_bots(1)
 
 func _on_click(pos: Vector2) -> void:
 	if !SplitMod.is_joined(SplitMod.DEVICE_KBM):
@@ -245,9 +262,11 @@ func _on_pad_button(event: InputEventJoypadButton) -> void:
 			else: _join(device)
 		JOY_BUTTON_DPAD_UP: _move(-1)
 		JOY_BUTTON_DPAD_DOWN: _move(1)
+		JOY_BUTTON_DPAD_LEFT: _change_bots(-1)
+		JOY_BUTTON_DPAD_RIGHT: _change_bots(1)
 
 func _on_pad_motion(event: InputEventJoypadMotion) -> void:
-	if event.axis != JOY_AXIS_LEFT_Y:
+	if event.axis != JOY_AXIS_LEFT_Y and event.axis != JOY_AXIS_LEFT_X:
 		return
 	var key := "%d:%d" % [event.device, event.axis]
 	if absf(event.axis_value) < STICK_THRESHOLD * 0.5:
@@ -256,7 +275,8 @@ func _on_pad_motion(event: InputEventJoypadMotion) -> void:
 	if absf(event.axis_value) < STICK_THRESHOLD or stick_latch.get(key, false):
 		return
 	stick_latch[key] = true
-	_move(1 if event.axis_value > 0 else -1)
+	if event.axis == JOY_AXIS_LEFT_X: _change_bots(1 if event.axis_value > 0 else -1)
+	else: _move(1 if event.axis_value > 0 else -1)
 
 func _row_at(pos: Vector2) -> int:
 	for r in rows.size():
@@ -280,6 +300,7 @@ func _move(dir: int) -> void:
 func _activate() -> void:
 	match selected:
 		Row.CUSTOMIZE: _open_customization()
+		Row.BOTS: _change_bots(1, true)
 		Row.START: _try_start()
 		Row.BACK: _back_to_menu()
 
@@ -297,9 +318,26 @@ func _leave(device: int) -> void:
 	speaker_leave.play()
 	_refresh()
 
+## Left / right on the CPU PLAYERS row (or anywhere: it is the only setting changed that way).
+## Confirming the row cycles through the values.
+func _change_bots(dir: int, wrap := false) -> void:
+	var free := SplitMod.MAX_PLAYERS - SplitMod.players.size()
+	var current := SplitMod.bots_in_match()
+	var value := current + dir
+	if wrap: value = wrapi(value, 0, free + 1)
+	value = clampi(value, 0, free)
+	if value == current:
+		return
+	SplitMod.bot_count = value
+	if selected != Row.BOTS:
+		selected = Row.BOTS
+	speaker_hover.pitch_scale = randf_range(0.95, 1.0)
+	speaker_hover.play()
+	_refresh()
+
 func _try_start() -> void:
-	if SplitMod.players.size() < SplitMod.MIN_PLAYERS:
-		_show_message("AT LEAST 2 PLAYERS NEED TO JOIN")
+	if !SplitMod.can_start():
+		_show_message("JOIN TO PLAY" if SplitMod.players.is_empty() else "ADD A CPU PLAYER OR LET SOMEONE JOIN")
 		speaker_leave.play()
 		return
 	leaving = true

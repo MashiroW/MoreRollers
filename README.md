@@ -2,11 +2,12 @@
 
 # MoreRollers - Local Splitscreen for Buckshot Roulette
 
-[![Version](https://img.shields.io/badge/version-1.0-2ea44f?style=for-the-badge)](https://github.com/MashiroW/MoreRollers) [![Windows](https://img.shields.io/badge/Windows-0078D6?style=for-the-badge&logo=data:image/svg%2bxml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0id2hpdGUiIGQ9Ik0wIDBoMTF2MTFIMHpNMTMgMGgxMXYxMUgxM3pNMCAxM2gxMXYxMUgwek0xMyAxM2gxMXYxMUgxM3oiLz48L3N2Zz4=&logoColor=white)](#) [![Stars](https://img.shields.io/github/stars/MashiroW/MoreRollers?style=for-the-badge&logo=github&color=e3b341)](https://github.com/MashiroW/MoreRollers/stargazers) [![Sponsor](https://img.shields.io/badge/Sponsor-%E2%9D%A4-EA4AAA?style=for-the-badge&logo=githubsponsors&logoColor=white)](https://github.com/sponsors/MashiroW)
+[![Version](https://img.shields.io/badge/version-1.1-2ea44f?style=for-the-badge)](https://github.com/MashiroW/MoreRollers) [![Windows](https://img.shields.io/badge/Windows-0078D6?style=for-the-badge&logo=data:image/svg%2bxml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0id2hpdGUiIGQ9Ik0wIDBoMTF2MTFIMHpNMTMgMGgxMXYxMUgxM3pNMCAxM2gxMXYxMUgwek0xMyAxM2gxMXYxMUgxM3oiLz48L3N2Zz4=&logoColor=white)](#) [![Stars](https://img.shields.io/github/stars/MashiroW/MoreRollers?style=for-the-badge&logo=github&color=e3b341)](https://github.com/MashiroW/MoreRollers/stargazers) [![Sponsor](https://img.shields.io/badge/Sponsor-%E2%9D%A4-EA4AAA?style=for-the-badge&logo=githubsponsors&logoColor=white)](https://github.com/sponsors/MashiroW)
 
-*A mod that adds **local splitscreen multiplayer** to **Buckshot Roulette**: 2 to 4 players on a single PC, each with their own view, playing the game's real multiplayer match.*
+*A mod that adds **local splitscreen multiplayer** to **Buckshot Roulette**: up to 4 players on a single PC, each with their own view, playing the game's real multiplayer match, with CPU players to fill the empty seats.*
 
 <img width="1920" height="1080" alt="Screenshot Buckshot MoreRollers" src="https://github.com/user-attachments/assets/3e78d16b-9745-4dad-8d43-f438187bad4b" />
+
 ---
 
 ## 📌 What it does
@@ -15,10 +16,12 @@ MoreRollers adds a **LOCAL SPLITSCREEN** entry to the main menu, right under MUL
 
 The mod does not rewrite the game. It runs the **official multiplayer mode**, one copy per player, linked together as if they were playing online. You get exactly the same table, items, rules and results screen as an online match, plus the original match customization menu.
 
+Seats nobody takes can go to **CPU players** that play like the Dealer from the single-player game, adapted to a table of up to four. You can also play alone against one to three of them.
+
 | | |
 |---|---|
 | Game version | v2.2.0.6 (Steam, Windows) |
-| Players | 2 to 4: one on keyboard & mouse, the others on controllers |
+| Players | 2 to 4 seats: up to 4 local players (one on keyboard & mouse, the others on controllers), CPU players in the free seats |
 | Game files modified | none |
 
 ---
@@ -55,8 +58,8 @@ The game folder goes back to exactly how it was.
 
 1. In the main menu, pick **LOCAL SPLITSCREEN**.
 2. Each player joins with their own device. The first one to join is player 1, the host of the match.
-3. Optionally, set up the match with **CUSTOMIZE MATCH SETTINGS**.
-4. Pick **START**. At least 2 players are needed.
+3. Optionally, add CPU players on the **CPU PLAYERS** row (left / right), and set up the match with **CUSTOMIZE MATCH SETTINGS**.
+4. Pick **START**. At least 2 seats must be taken, by local players or CPU players, and at least one local player must have joined.
 
 ### Lobby controls
 
@@ -65,11 +68,14 @@ The game folder goes back to exactly how it was.
 | Join | Enter, Space or left click | A |
 | Leave the lobby | Backspace | B |
 | Move between rows | Up / Down arrows | D-pad up / down or left stick |
+| Number of CPU players | Left / Right arrows, or confirm on the CPU PLAYERS row | D-pad left / right or left stick |
 | Confirm | Enter or click | A |
 | Start the match | START row | START row or Start button |
 | Back to the main menu | Escape or BACK row | BACK row |
 
 There is only one keyboard & mouse player; every other player uses a controller. If a controller is unplugged in the lobby, its player is removed.
+
+CPU players take the seats after the local players. If someone joins while every seat is taken, a CPU player makes room.
 
 ### Customizing the match
 
@@ -85,9 +91,19 @@ There is only one keyboard & mouse player; every other player uses a controller.
 
 The lobby then shows a summary of the settings, with the same wording as the online lobby: number of rounds, intro skipped, customized items. These settings are shared with the online multiplayer lobby and last until the game is closed, as in the original game.
 
+### CPU players
+
+They are named DEALER (DEALER 1, 2, 3 when there are several) and play the Dealer's game from the single-player mode, reworked for multiplayer:
+- **Same priorities as the Dealer**: magnifying glass when the shell is unknown, cigarettes when hurt, beer to get rid of a doubtful shell, handsaw on a live shell, inverter on a blank, burner phone while there are shells to learn about, adrenaline to steal what it needs. The jammer takes the place of the handcuffs.
+- **Built for a table of four**: it picks its target among all the players (one it can finish off first, otherwise the most dangerous one, by health and items), jams the most dangerous opponent, and uses the remote when the player about to get the shotgun is more dangerous than the one on the other side. Single-player-only behaviour (handcuffs, the defibrillator wires, endless mode) is gone.
+- **Smarter**: instead of the Dealer's coin flips it counts the shells shown at loading and every shell that comes out, and decides on the odds. A likely blank is shot at itself to keep the turn (unless it is on its last life), a likely live at an opponent. It never wastes a handsaw on a target with 1 health, and never shoots itself on a known live.
+- **No cheating**: it only knows what a player in its seat would know. That means the shells shown at loading, the shells fired or racked out, and what its own magnifying glass and burner phone told it. Other players' magnifying glasses and phones stay hidden from it, even though its copy of the match receives them.
+
+It takes a short moment before each move, like the Dealer, so you can follow what it does.
+
 ### In a match
 
-- **Layout**: with 2 players the views sit side by side, and each player's name and device stay visible above their view. With 3 or 4 players the views are in a 2 × 2 grid, and that info shows for a few seconds at the top of each view.
+- **Layout**: with 2 local players the views sit side by side, and each player's name and device stay visible above their view. With 3 or 4 local players the views are in a 2 × 2 grid, and that info shows for a few seconds at the top of each view. Playing alone against CPU players, your view fills the screen. CPU players have no view of their own; you see them at the table.
 - **Controls** are the game's own:
   - Keyboard & mouse: click to interact, hold right click to look around, Escape for the pause menu. The cursor stays inside its player's view.
   - Controller: D-pad to choose, A to confirm, left trigger to look around, Start for the pause menu.
@@ -112,6 +128,7 @@ The lobby then shows a summary of the settings, with the same wording as the onl
                 └──── in-memory packet bus ────┘   (replaces Steam P2P)
 
  keyboard + mouse ──► keyboard player's view     controller n ──► its player's view
+ CPU player ──► its own copy of mp_main, not drawn, on the same bus
 ```
 
 ### Starting point: the game's own multiplayer
@@ -142,6 +159,13 @@ External resources the match edits at runtime (the `Environment` used for the de
 
 Player 1's copy is the **host**, the others are **clients**, exactly like online.
 
+### CPU players
+
+A CPU player is a client like the others: it gets its own copy of `mp_main`, whose `SubViewport` is never drawn (`UPDATE_DISABLED`), and a `split_bot.gd` node plays its seat.
+- **Acting**: it makes the same calls the mouse and controller prompts make in its copy (`InteractWith("shotgun")`, `InteractWith("item", ...)`, the jammer keys, `Shoot()`). Its moves go to the host as ordinary requests and are checked by the game's own `MP_PacketVerification`.
+- **Waiting for the host**: each copy plays the animations at its own pace (first person in its copy, third person in the host's), so a request sent the moment its copy is ready could reach a host that is not, and be refused. The bot waits until the host's copy, in the same process, would accept the request. If a request is still refused, it takes its controls back after a few seconds, like the game does at the end of a move.
+- **Knowing**: `SplitMod.observe_packet()` shows it every packet its copy receives from the host. It keeps the shell counts from `sequence_visible` at loading, removes each shell that is fired or racked, notes the shell its own magnifying glass or phone revealed, and tracks inverter uses on the chamber shell. Shell details meant for another player are ignored.
+
 ### The network, replaced by an in-memory bus
 
 - `PacketManager.send_p2p_packet()` calls `SplitMod.send_packet()`. The packet is serialized (`var_to_bytes`) and dropped into the queue of each recipient: every other player for target `0`, otherwise the targeted player.
@@ -158,7 +182,7 @@ In a single process, the game's singletons are shared by every copy. The match s
 | `get_node("/root/mp_main/...")` | `SplitMod.mp_root(self).get_node(...)` | This copy's `mp_main` scene |
 | `Input.set_mouse_mode`, `Input.set_custom_mouse_cursor` | `SplitMod.set_mouse_mode`, `SplitMod.set_custom_mouse_cursor` | Only the keyboard & mouse player's copy drives the cursor |
 | `AudioServer.set_bus_volume_db`, `AudioServer.get_bus_effect` | `SplitMod.set_bus_volume_db`, `SplitMod.get_bus_effect` | Only player 1's copy sets volumes and the low-pass filter |
-| `Steam.getFriendPersonaName`, `Steam.getPlayerAvatar` | `SplitMod.persona_name`, `SplitMod.get_player_avatar` | Names "PLAYER 1" to "PLAYER 4" |
+| `Steam.getFriendPersonaName`, `Steam.getPlayerAvatar` | `SplitMod.persona_name`, `SplitMod.get_player_avatar` | Names "PLAYER 1" to "PLAYER 4", and DEALER for CPU players |
 | `GlobalVariables.cursor_state_after_toggle` | `SplitMod.gv(self).cursor_state_after_toggle` | Cursor state kept per player |
 | `change_scene_to_file(mp_lobby)` | `SplitMod.change_scene(...)` | End of match: back to the splitscreen lobby |
 
@@ -228,8 +252,13 @@ Checked in an isolated copy of the game, with 2 players (mouse for player 1, sim
 
 A full 2-player match (mouse + real controller) was also played on the installed version.
 
+Also checked, with CPU players (a CPU brain driving player 1's seat too, so whole matches play unattended):
+- full matches with 1 local player and 3 CPU players, over several rounds: item distribution, every item including the jammer, adrenaline steals and the remote, shots, deaths, revivals between rounds, the results screen and the return to the lobby;
+- full matches with 1 local player and 1 CPU player.
+
 Not checked yet:
-- 3 and 4 players;
+- 3 and 4 local players (4 seats were only checked with CPU players);
+- a full match played by hand against CPU players on the installed version;
 - a full online match with the mod installed.
 
 ---
@@ -264,6 +293,7 @@ No extracted game file is stored in the repository: `build\` is ignored by Git.
 | `src\lobby_ui_additions.gd` | "Customization only" mode of the multiplayer lobby, appended to `MP_LobbyUI.gd` |
 | `src\pack\mods\splitscreen\split_lobby.*` | Lobby: joining, access to customization, settings summary |
 | `src\pack\mods\splitscreen\split_session.*` | Match: views, loading the match copies, input routing, staged shutdown |
+| `src\pack\mods\splitscreen\split_bot.gd` | CPU player: what it knows of the shells, its decisions, and the calls that play them |
 | `tools\build.js` | Patching the game's scripts and building the mod |
 | `tools\pck.js`, `tools\mkpck.js` | Reading and writing Godot 4.1 packs (PCK format v2) |
 | `tools\mp_main_scripts.txt` | List of the scripts used by the multiplayer scene |
@@ -297,6 +327,7 @@ Useful runs from Git Bash (log in `%APPDATA%\BuckshotSplitTest\logs\godot.log`):
 | `SPLIT_TEST_MODE=conclusion`, with or without `SPLIT_TEST_DISCONNECT=1` / `2` | The host ends the match (results screen), optionally with a disconnect during the results |
 | `SPLIT_TEST_MODE=custom_visual` | Lobby and customization screen (controller), then a match with the saved settings |
 | `SPLIT_TEST_MODE=online_lobby` with `--headless` | Checks that the online multiplayer lobby is unchanged |
+| `SPLIT_TEST_MODE=bots SPLIT_TEST_BOTS=3 SPLIT_TEST_LOG=<file>` | Player 1 and 1 to 3 CPU players, player 1's seat played by a CPU brain too; writes the decisions and a state dump every 5 s to `<file>` |
 | `SPLIT_TEST_SHOTS=<folder>` (add `SPLIT_TEST_VIEWS=1` for each player's view) | Saves screenshots during any of the runs above |
 | `CHECK_LIST=<list.txt> "Buckshot Roulette.exe" --headless --script <absolute path>/tools/godot/compile_check.gd` | Compiles the listed scripts (one `res://` path per line) in the game's engine |
 

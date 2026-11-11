@@ -69,6 +69,7 @@ func split_read_p2p_packet() -> void:
 	if GlobalVariables.printing_packets:
 		print("received packet: ", readable_data)
 	temp_id = packet_sender
+	SplitMod.observe_packet(self, readable_data)
 	PipeData(readable_data)
 `, 0],
   ],

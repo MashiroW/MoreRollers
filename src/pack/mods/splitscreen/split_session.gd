@@ -1,10 +1,12 @@
 extends Control
 ## Splitscreen match. Every local player gets a SubViewport (own 3D world, the game's native
 ## 960x540) holding a full copy of the multiplayer scene; player 1's copy is the host. Input is
-## routed per device: keyboard & mouse to its player, each controller to its player.
+## routed per device: keyboard & mouse to its player, each controller to its player. CPU players get a
+## copy too, never drawn, played by a split_bot.gd node.
 
 const MP_MAIN := "res://multiplayer/scenes/mp_main.tscn"
 const USER_INSTANCE := "res://multiplayer/instances/user_instance_main_1.tscn"
+const BOT_SCRIPT := "res://mods/splitscreen/split_bot.gd"
 const FONT_MAIN := "res://fonts/fake receipt.otf"
 const VIEW_SIZE := Vector2i(960, 540)
 const GAP := 4.0
@@ -78,7 +80,7 @@ func _ready() -> void:
 	_layout()
 	# Tags that had to go on top of a view (no letterbox room) fade out after a few seconds.
 	for v in views:
-		if v.tag_overlaps_view:
+		if !v.hidden and v.tag_overlaps_view:
 			var tween := create_tween()
 			tween.tween_interval(6.0)
 			tween.tween_property(v.tag, "modulate:a", 0.0, 1.5)
@@ -105,6 +107,8 @@ func shutdown(quitting: bool) -> void:
 	_quitting = _quitting or quitting
 	started = false
 	for v in views:
+		if v.brain != null:
+			v.brain.process_mode = Node.PROCESS_MODE_DISABLED
 		v.vp.gui_disable_input = true
 		_release_gui(v.vp)
 		for child in v.vp.get_children():
@@ -117,7 +121,8 @@ func shutdown(quitting: bool) -> void:
 	# scene change below, so they also run before the copies are freed.
 	for v in views:
 		_release_gui(v.vp)
-		v.screen.texture = null
+		if !v.hidden:
+			v.screen.texture = null
 	if _quitting:
 		get_tree().quit()
 	else:
@@ -152,7 +157,8 @@ func _add_view(c, packed: PackedScene) -> void:
 	vp.size = VIEW_SIZE
 	vp.own_world_3d = true
 	vp.handle_input_locally = true
-	vp.render_target_update_mode = SubViewport.UPDATE_ALWAYS
+	# A CPU player's copy runs the match but is never drawn.
+	vp.render_target_update_mode = SubViewport.UPDATE_DISABLED if c.bot else SubViewport.UPDATE_ALWAYS
 	# Only player 1's copy is heard; the others play the same sounds in sync.
 	vp.audio_listener_enable_2d = c.primary
 	vp.audio_listener_enable_3d = c.primary
@@ -179,6 +185,17 @@ func _add_view(c, packed: PackedScene) -> void:
 	vp.set_meta(&"split_ctx", c.index)
 	add_child(vp)
 
+	if c.bot:
+		var bot_instance := packed.instantiate()
+		_isolate_resources(bot_instance, _isolation_caches[c.index])
+		vp.add_child(bot_instance)
+		var brain : Node = (load(BOT_SCRIPT) as Script).new()
+		brain.setup(c, vp, views[0].vp)
+		add_child(brain)
+		c.brain = brain
+		views.append({"ctx": c, "vp": vp, "hidden": true, "brain": brain})
+		return
+
 	var screen := TextureRect.new()
 	screen.texture = vp.get_texture()
 	screen.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
@@ -198,7 +215,7 @@ func _add_view(c, packed: PackedScene) -> void:
 	var instance := packed.instantiate()
 	_isolate_resources(instance, _isolation_caches[c.index])
 	vp.add_child(instance)
-	views.append({"ctx": c, "vp": vp, "screen": screen, "tag": tag, "tag_overlaps_view": false, "warning": warning})
+	views.append({"ctx": c, "vp": vp, "hidden": false, "brain": null, "screen": screen, "tag": tag, "tag_overlaps_view": false, "warning": warning})
 
 
 # ---------------------------------------------------------------- layout
@@ -207,12 +224,13 @@ func _layout() -> void:
 	if !started:
 		return
 	var area := get_viewport_rect().size
-	var n := views.size()
-	var cols := 2
+	var shown := views.filter(func(v): return !v.hidden)
+	var n := shown.size()
+	var cols := 1 if n == 1 else 2
 	var rows := 1 if n <= 2 else 2
 	var cell := Vector2(area.x / cols, area.y / rows)
 	for i in n:
-		var v : Dictionary = views[i]
+		var v : Dictionary = shown[i]
 		var cell_pos := Vector2((i % cols) * cell.x, (i / cols) * cell.y)
 		var avail := cell - Vector2(GAP, GAP)
 		var s := minf(avail.x / VIEW_SIZE.x, avail.y / VIEW_SIZE.y)
@@ -340,5 +358,5 @@ func _mouse_to_view(event: InputEventMouse, r: Rect2) -> InputEventMouse:
 
 func _on_joy_connection_changed(device: int, connected: bool) -> void:
 	for v in views:
-		if v.ctx.device == device:
+		if !v.hidden and v.ctx.device == device:
 			v.warning.visible = !connected

@@ -7,6 +7,7 @@ extends Node
 ## SPLIT_TEST_MODE=conclusion      the host ends the match; SPLIT_TEST_DISCONNECT=1|2 also disconnects during results
 ## SPLIT_TEST_MODE=custom_visual   lobby + customization screen driven with the controller, then a match
 ## SPLIT_TEST_MODE=online_lobby    the normal multiplayer lobby, which must be unchanged
+## SPLIT_TEST_MODE=bots            P1 + SPLIT_TEST_BOTS CPU players (default 3), P1 played by a CPU brain too
 ## SPLIT_TEST_MODE=disconnect / experiment / quit: narrower checks used while tracking the teardown crash
 ## SPLIT_TEST_SHOTS=<folder> saves screenshots there (SPLIT_TEST_VIEWS=1 also saves each player's view).
 
@@ -299,11 +300,57 @@ func _ready() -> void:
 		_screenshot()
 		get_tree().quit()
 		return
+	if mode == "bots":
+		# P1 (keyboard & mouse) plus SPLIT_TEST_BOTS CPU players; P1's seat is played by a CPU brain too,
+		# so the whole match runs on its own until the results screen sends everyone back to the lobby.
+		await get_tree().create_timer(1.5).timeout
+		SplitMod.players.clear()
+		SplitMod.join(SplitMod.DEVICE_KBM)
+		SplitMod.bot_count = int(OS.get_environment("SPLIT_TEST_BOTS")) if OS.get_environment("SPLIT_TEST_BOTS") != "" else 3
+		_set_match(int(OS.get_environment("SPLIT_TEST_ROUNDS")) if OS.get_environment("SPLIT_TEST_ROUNDS") != "" else 1, true)
+		SplitMod.start_session()
+		var session = null
+		while session == null or !session.get("started"):
+			await get_tree().process_frame
+			session = get_tree().current_scene
+		var brain : Node = (load(session.BOT_SCRIPT) as Script).new()
+		brain.setup(session.views[0].ctx, session.views[0].vp, session.views[0].vp)
+		session.add_child(brain)
+		print("SPLITTEST bots session started, seats=", session.views.size(), " hidden=", session.views.filter(func(v): return v.hidden).size())
+		# stdout is block-buffered when redirected, so this run also writes its own flushed log.
+		var log_path := OS.get_environment("SPLIT_TEST_LOG")
+		var flog : FileAccess = FileAccess.open(log_path, FileAccess.WRITE) if log_path != "" else null
+		var write := func(line: String):
+			print(line)
+			if flog != null:
+				flog.store_line("[%.1f] %s" % [t, line])
+				flog.flush()
+		var brains := [brain]
+		for v in session.views:
+			if v.brain != null: brains.append(v.brain)
+		for b in brains:
+			b.log_sink = write
+		write.call("SPLITTEST bots session started, seats=%d" % session.views.size())
+		var next_dump := 0.0
+		while SplitMod.active and is_instance_valid(session):
+			if session.get("started") and t >= next_dump:
+				next_dump = t + 5.0
+				write.call("SPLITTEST state " + _bot_state(session, brains))
+			await get_tree().process_frame
+		var waited := 0.0
+		while waited < 15.0 and (get_tree().current_scene == null or get_tree().current_scene.name != "split_lobby"):
+			await get_tree().process_frame
+			waited += get_process_delta_time()
+		write.call("SPLITTEST bots session ended t=%.1f scene=%s active=%s" % [t, get_tree().current_scene.name if get_tree().current_scene else "null", SplitMod.active])
+		await get_tree().create_timer(3.0).timeout
+		get_tree().quit()
+		return
 	if mode == "session" or mode == "lobby":
 		await get_tree().create_timer(1.5).timeout
 		SplitMod.players.clear()
 		SplitMod.join(SplitMod.DEVICE_KBM)
-		SplitMod.join(0)
+		if OS.get_environment("SPLIT_TEST_SOLO") != "1": SplitMod.join(0)
+		SplitMod.bot_count = int(OS.get_environment("SPLIT_TEST_BOTS"))
 		_set_match(int(OS.get_environment("SPLIT_TEST_ROUNDS")) if OS.get_environment("SPLIT_TEST_ROUNDS") != "" else 1, OS.get_environment("SPLIT_TEST_SKIP_INTRO") != "0")
 		if mode == "session":
 			SplitMod.start_session()
@@ -389,6 +436,24 @@ func _screenshot() -> void:
 func _intermediary(v):
 	var root = v.vp.get_child(0)
 	return root.get_node("standalone managers/interactions/interaction intermediary")
+
+## One line per seat: what its copy thinks of the turn and its own flags.
+func _bot_state(session, brains: Array) -> String:
+	var parts := []
+	for v in session.views:
+		var inter = _intermediary(v)
+		var p = inter.intermed_properties
+		if p == null:
+			parts.append("%s: no instance" % v.ctx.name)
+			continue
+		var gs = inter.game_state
+		parts.append("%s sock=%d hp=%d turn=%d has_turn=%s perm=%s gun_ok=%s holding=%s grab=%s holditem=%s intake=%s item=%s second=%s loading=%s round=%d" % [
+			v.ctx.name, p.socket_number, p.health_current, gs.MAIN_active_current_turn_socket, p.has_turn, p.major_permission_enabled,
+			inter.intbranch_shotgun.interactionAllowed, p.is_holding_shotgun, p.is_grabbing_items, p.is_holding_item_to_place,
+			p.item_manager.intbranch_intake.interactionAllowed, p.is_interacting_with_item, p.is_on_secondary_interaction,
+			gs.MAIN_shotgun_loading_in_progress, gs.MAIN_active_round_index])
+	var busy := brains.map(func(b): return "%s:%s" % [b.name, "busy" if b.busy else "idle"])
+	return " | ".join(parts) + " || " + " ".join(busy)
 
 func _log_state(session) -> void:
 	var parts := []

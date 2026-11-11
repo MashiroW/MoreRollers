@@ -10,7 +10,7 @@ extends Node
 ## The patched scripts ask this node for anything that used to be process-global (local Steam ID,
 ## mouse cursor, audio buses, scene changes) and get the answer for their own player.
 
-const MOD_VERSION := "1.0.0"
+const MOD_VERSION := "1.1.0"
 const GAME_VERSION := "v2.2.0.6"
 const PACK_FILE := "splitscreen.pck"
 const LOBBY_SCENE := "res://mods/splitscreen/split_lobby.tscn"
@@ -21,6 +21,8 @@ const MATCH_CUSTOMIZATION_SCRIPT := "res://multiplayer/scripts/global scripts/MP
 const MAX_PLAYERS := 4
 const MIN_PLAYERS := 2
 const DEVICE_KBM := -1
+## Seats played by the computer (see split_bot.gd).
+const DEVICE_BOT := -2
 const FIRST_LOCAL_ID := 1001
 ## md5 of every original game file the pack replaces, filled in by the build. If the game
 ## gets updated and any of them changes, the pack is not mounted and the game runs unmodded.
@@ -68,12 +70,17 @@ class Ctx:
 	var cursor_state_after_toggle := false
 	var lowpass_dummy : AudioEffect
 	var view_rect := Rect2()
+	var bot := false
+	## The split_bot.gd node playing this seat, for CPU players.
+	var brain : Node
 
 var enabled := false
 var active := false
 var ending := false
 ## Joined players, in seat order: {"device": int, "id": int, "name": String}
 var players : Array = []
+## CPU players asked for in the lobby; they take the seats left free by the local players.
+var bot_count := 0
 ## True while the multiplayer lobby scene is open on its match customization screen for splitscreen.
 var customizing := false
 var lobby_message := ""
@@ -122,7 +129,22 @@ func _renumber_players() -> void:
 func device_label(device: int) -> String:
 	if device == DEVICE_KBM:
 		return "KEYBOARD & MOUSE"
+	if device == DEVICE_BOT:
+		return "CPU"
 	return "CONTROLLER %d" % (device + 1)
+
+## CPU players that actually get a seat: as many as asked for, within the free seats.
+func bots_in_match() -> int:
+	return clampi(bot_count, 0, MAX_PLAYERS - players.size())
+
+func seat_count() -> int:
+	return players.size() + bots_in_match()
+
+func can_start() -> bool:
+	return players.size() >= 1 and seat_count() >= MIN_PLAYERS
+
+func bot_name(n: int, total: int) -> String:
+	return "DEALER" if total == 1 else "DEALER %d" % n
 
 ## Opens the multiplayer lobby scene straight on its match customization screen (see the MP_LobbyUI patch).
 ## Saving or cancelling there comes back to the splitscreen lobby.
@@ -158,17 +180,22 @@ func match_summary() -> Array:
 # ---------------------------------------------------------------- session lifecycle
 
 func start_session() -> void:
-	if active or players.size() < MIN_PLAYERS:
+	if active or !can_start():
 		return
 	contexts.clear()
-	for i in players.size():
+	var seats := players.duplicate(true)
+	var bots := bots_in_match()
+	for n in bots:
+		seats.append({"device": DEVICE_BOT, "id": FIRST_LOCAL_ID + seats.size(), "name": bot_name(n + 1, bots)})
+	for i in seats.size():
 		var c := Ctx.new()
 		c.index = i
-		c.user_id = players[i].id
-		c.name = players[i].name
-		c.device = players[i].device
+		c.user_id = seats[i].id
+		c.name = seats[i].name
+		c.device = seats[i].device
+		c.bot = seats[i].device == DEVICE_BOT
 		c.primary = i == 0
-		c.owns_mouse = players[i].device == DEVICE_KBM
+		c.owns_mouse = seats[i].device == DEVICE_KBM
 		var lowpass := AudioServer.get_bus_effect(1, 0)
 		c.lowpass_dummy = (lowpass.duplicate() as AudioEffect) if lowpass != null else AudioEffectLowPassFilter.new()
 		contexts.append(c)
@@ -176,7 +203,7 @@ func start_session() -> void:
 	_apply_globals()
 	active = true
 	ending = false
-	print("[splitscreen] starting match with players: ", players)
+	print("[splitscreen] starting match with players: ", seats)
 	get_tree().change_scene_to_file(SESSION_SCENE)
 
 ## Called by the patched scripts (or the session) to leave the match and go back to the splitscreen lobby.
@@ -378,6 +405,12 @@ func send_packet(node: Node, target: int, data: Dictionary) -> void:
 	for c in contexts:
 		if c != from and (target == 0 or c.user_id == target):
 			c.inbox.append([from.user_id, bytes])
+
+## Called by a copy for each packet it is about to handle: a CPU player learns what happens at the table here.
+func observe_packet(node: Node, data: Dictionary) -> void:
+	var c := ctx_of(node)
+	if c != null and c.bot and c.brain != null:
+		c.brain.observe(data)
 
 ## Replaces Steam.readP2PPacket: [sender_id, bytes] or null.
 func pop_packet(node: Node):
